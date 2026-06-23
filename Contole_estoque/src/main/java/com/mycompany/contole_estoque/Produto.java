@@ -26,12 +26,13 @@ public abstract class Produto {
     public String getCategoria(){return this.categoria;}
     
     public void setNome(String nome){this.nome = nome;}
-    public void setId(int Id){this.id = id;}
+    public void setId(int id){this.id = id;}
     public void setCategoria(String categoria){this.categoria = categoria;}
+    
+    public abstract double calcularPrejuizo();
     
     public void cadastrar() {
       //implementação futura
         System.out.println("Produto '" + this.nome + "' cadastrado com sucesso no sistema.");
     }
-    public abstract double calcularPrejuizo();
 }

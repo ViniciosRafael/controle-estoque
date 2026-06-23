@@ -30,12 +30,9 @@ public class ProdutoPerecivel extends Produto {
     public int getEstoqueMinimo(){return this.estoqueMinimo;}
     public double getPrecoUnitario(){return this.precoUnitario;}
     
-    @SuppressWarnings("SillyAssignment")
-    public void setDataValidade(){this.dataValidade = dataValidade;}
-    @SuppressWarnings("SillyAssignment")
-    public void setEstoqueMinimo(){this.estoqueMinimo = estoqueMinimo;}
-    @SuppressWarnings("SillyAssignment")
-    public void setPrecoUnitario() {this.precoUnitario = precoUnitario;}
+    public void setDataValidade(LocalDate dataValidade){this.dataValidade = dataValidade;}
+    public void setEstoqueMinimo(int estoqueMinimo){this.estoqueMinimo = estoqueMinimo;}
+    public void setPrecoUnitario(double precoUnitario) {this.precoUnitario = precoUnitario;}
     
     /**
      Verifica se a data de validade já passou em relação à data atual do sistema. treu p/ vencido false ainda não
@@ -54,16 +51,8 @@ public class ProdutoPerecivel extends Produto {
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), this.dataValidade);
     }
     
-    /**
-     * Sobrescreve (Override) o método abstrato da classe mãe Produto.
-     * Calcula o prejuízo financeiro com base no descarte total do lote.
-     * @return 
-    */
     @Override
     public double calcularPrejuizo() {
-        return this.precoCusto * this.taxaDepreciacaoAvaria;
-        //IMPLEMENTAR ESSE METÓDO
-        // Implementação conceitual base: assume o descarte ou lógica interna
         return this.precoUnitario; 
     }
 }
