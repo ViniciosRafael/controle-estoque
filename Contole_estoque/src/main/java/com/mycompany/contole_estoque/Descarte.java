@@ -42,7 +42,7 @@ public class Descarte {
         System.out.println("Motivo: " + this.motivo);
         System.out.println("Produto: " + this.lote.getProduto().getNome());
         System.out.println("Quantidade: " + this.quantidadeDescartada);
-        System.out.println("Prejuízo Total: € " + this.calcularPrejuizo());
+        System.out.println("Prejuízo Total: " + this.calcularPrejuizo());
     }
 
 }
