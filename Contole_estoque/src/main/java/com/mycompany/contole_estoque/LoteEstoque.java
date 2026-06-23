@@ -34,13 +34,14 @@ public class LoteEstoque {
         }
     }
 
-    public int GetIdLote(){return idLote;}
-    public Produto GetProduto(){return produto;}
-    public int GetQuantidade(){return quantidade;}
+    public int getIdLote(){return idLote;}
+    public Produto getProduto(){return produto;}
+    public int getQuantidade(){return quantidade;}
     public LocalDate getDataEntrada(){return dataEntrada;}
     
     public void setIdLote(int idLote){this.idLote = idLote;}
     public void setProduto(Produto produto){this.produto = produto;}
     public void setIQuantidade(int quantidade){this.quantidade = quantidade;}
     public void setDataEntrada(LocalDate dataEntrada){this.dataEntrada = dataEntrada;}
+
 }
