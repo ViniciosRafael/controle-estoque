@@ -44,5 +44,18 @@ public class Descarte {
         System.out.println("Quantidade: " + this.quantidadeDescartada);
         System.out.println("Prejuízo Total: " + this.calcularPrejuizo());
     }
+    
+    public int getDescarteId(){return descarteId;}
+    public LoteEstoque getLote(){ return lote; }
+    public int getQuantidadeDescartada() { return quantidadeDescartada; }
+    public LocalDate getDataDescarte(){ return dataDescarte; }
+    public String getMotivo(){ return motivo;}
+
+    public void setDescarteId(int descarteId){ this.descarteId= descarteId; }
+    public void setLote(LoteEstoque lote){ this.lote= lote; }
+    public void setQuantidadeDescartada(int quantidadeDescartada){ this.quantidadeDescartada = quantidadeDescartada; }
+    public void setDataDescarte(LocalDate dataDescarte){ this.dataDescarte = dataDescarte; }
+    public void setMotivo(String motivo){ this.motivo= motivo; }
+
 
 }

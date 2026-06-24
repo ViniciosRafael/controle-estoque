@@ -25,6 +25,18 @@ public class LoteEstoque {
         this.dataEntrada = dataEntrada;
     }
     
+    /** Delega para ProdutoPerecivel: true se a data de validade já passou. */
+    public boolean isVencido() {
+        return produto.isVencido();
+    }
+    
+    /** Delega para ProdutoPerecivel: dias restantes até o vencimento (negativo se já vencido). */
+    public int diasParaVencer() {
+        return produto.diasParaVencer();
+    }
+    
+    /** Reduz a quantidade do lote em n unidades.
+     * @param qtd */
     public void darBaixa(int qtd) {
         if (qtd <= this.quantidade) {
             this.quantidade -= qtd;
