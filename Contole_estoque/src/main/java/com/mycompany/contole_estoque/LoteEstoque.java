@@ -12,25 +12,25 @@ import java.time.LocalDate;
  */
 public class LoteEstoque {
     private int idLote;
-    private Produto produto; 
+    private ProdutoPerecivel produto;
     private int quantidade;
     private LocalDate dataEntrada;
     
     public LoteEstoque(){}
     
-    public LoteEstoque(int idLote, Produto produto, int quantidade, LocalDate dataEntrada){
+    public LoteEstoque(int idLote, ProdutoPerecivel produto, int quantidade, LocalDate dataEntrada){
         this.idLote = idLote;
         this.produto = produto;
         this.quantidade = quantidade;
         this.dataEntrada = dataEntrada;
     }
     
-    /** Delega para ProdutoPerecivel: true se a data de validade já passou. */
-    public boolean isVencido() {
-        return produto.isVencido();
-    }
+    /** Delega para ProdutoPerecivel: true se a data de validade já passou.
+     * @return  */
+    public boolean isVencido()   { return produto.isVencido(); }
     
-    /** Delega para ProdutoPerecivel: dias restantes até o vencimento (negativo se já vencido). */
+    /** Delega para ProdutoPerecivel: dias restantes até o vencimento (negativo se já vencido).
+     * @return  */
     public int diasParaVencer() {
         return produto.diasParaVencer();
     }
@@ -47,12 +47,12 @@ public class LoteEstoque {
     }
 
     public int getIdLote(){return idLote;}
-    public Produto getProduto(){return produto;}
+    public ProdutoPerecivel  getProduto(){return produto;}
     public int getQuantidade(){return quantidade;}
     public LocalDate getDataEntrada(){return dataEntrada;}
     
     public void setIdLote(int idLote){this.idLote = idLote;}
-    public void setProduto(Produto produto){this.produto = produto;}
+    public void setProduto(ProdutoPerecivel  produto){this.produto = produto;}
     public void setIQuantidade(int quantidade){this.quantidade = quantidade;}
     public void setDataEntrada(LocalDate dataEntrada){this.dataEntrada = dataEntrada;}
 

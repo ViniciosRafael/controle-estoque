@@ -8,7 +8,7 @@ package com.mycompany.contole_estoque;
  *
  * @author vinic
  */
-public class AlertaEstoqueMinimo {
+public class AlertaEstoqueMinimo extends Alerta {
     private int qtdAtual;
 
     public AlertaEstoqueMinimo() { super(); }
