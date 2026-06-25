@@ -62,11 +62,13 @@ public class ProdutosPanel extends JPanel {
         tabs.addTab("🥩  Perecíveis", tablePanel(perecTable, perecModel, true));
 
         // ── Não Perecíveis
-        String[] nCols = {"ID","Nome","Categoria","Preço Unitário"};
+        String[] nCols = {"ID","Nome","Categoria","Preço Unitário","Est. Mínimo"};
         naoModel = emptyModel(nCols);
         naoTable = buildTable(naoModel);
         naoTable.getColumnModel().getColumn(0).setPreferredWidth(45);
-        naoTable.getColumnModel().getColumn(1).setPreferredWidth(260);
+        naoTable.getColumnModel().getColumn(1).setPreferredWidth(220);
+        naoTable.getColumnModel().getColumn(3).setPreferredWidth(130);
+        naoTable.getColumnModel().getColumn(4).setPreferredWidth(100);
 
         tabs.addTab("🥫  Não Perecíveis", tablePanel(naoTable, naoModel, false));
         return tabs;
@@ -116,7 +118,8 @@ public class ProdutosPanel extends JPanel {
         for (ProdutoNaoPerecivel p : EstoqueStore.get().getNaoPerec()) {
             naoModel.addRow(new Object[]{
                 p.getId(), p.getNome(), p.getCategoria(),
-                String.format("R$ %.2f", p.getPrecoUnitario())
+                String.format("R$ %.2f", p.getPrecoUnitario()),
+                p.getEstoqueMinimo()
             });
         }
     }
