@@ -39,10 +39,10 @@ public class NovoProdutoDialog extends JDialog {
 
     public NovoProdutoDialog(JFrame owner) {
         super(owner, "Novo Produto", true);
-        setSize(460, 460);
-        setMinimumSize(new Dimension(440, 420));
+        setSize(480, 560);
+        setMinimumSize(new Dimension(460, 500));
         setLocationRelativeTo(owner);
-        setResizable(false);
+        setResizable(true);
         buildUI();
         actualizarCampos();
     }
@@ -54,9 +54,15 @@ public class NovoProdutoDialog extends JDialog {
         root.setBackground(BG_WHITE);
         setContentPane(root);
 
-        root.add(buildHeader(),  BorderLayout.NORTH);
-        root.add(buildBody(),    BorderLayout.CENTER);
-        root.add(buildFooter(),  BorderLayout.SOUTH);
+        root.add(buildHeader(), BorderLayout.NORTH);
+
+        // ScrollPane garante que nenhum campo fique escondido
+        JScrollPane scroll = new JScrollPane(buildBody());
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getVerticalScrollBar().setUnitIncrement(12);
+        root.add(scroll, BorderLayout.CENTER);
+
+        root.add(buildFooter(), BorderLayout.SOUTH);
     }
 
     private JPanel buildHeader() {
@@ -211,9 +217,6 @@ public class NovoProdutoDialog extends JDialog {
         boolean isPerec = cbTipo.getSelectedIndex() == 0;
         pnlPerecField.setVisible(isPerec);
         btnSave.setBackground(isPerec ? ACCENT_PERC : ACCENT_NAO);
-
-        // ajuste de altura conforme campos visíveis
-        setSize(460, isPerec ? 480 : 430);
         validate();
         repaint();
     }

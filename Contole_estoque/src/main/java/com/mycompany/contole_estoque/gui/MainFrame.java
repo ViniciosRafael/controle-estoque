@@ -7,15 +7,19 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Janela principal da aplicação.
- * Sidebar de navegação fixa + área central com CardLayout.
+ * Janela principal — sidebar clara e área de conteúdo branca.
  */
 public class MainFrame extends JFrame {
 
-    private static final Color SIDEBAR_BG = new Color(18, 18, 30);
-    private static final Color ACTIVE_BG  = new Color(30, 90, 150);
-    private static final Color HOVER_BG   = new Color(35, 35, 58);
-    private static final Color TEXT_DIM   = new Color(140, 140, 165);
+    // ── paleta sidebar clara
+    private static final Color SIDEBAR_BG   = new Color(248, 249, 252);
+    private static final Color SIDEBAR_BORD = new Color(220, 222, 230);
+    private static final Color ACTIVE_BG    = new Color(0, 120, 210);
+    private static final Color ACTIVE_FG    = Color.WHITE;
+    private static final Color HOVER_BG     = new Color(232, 236, 245);
+    private static final Color HOVER_FG     = new Color(20, 22, 35);
+    private static final Color TEXT_NAV     = new Color(70, 75, 95);
+    private static final Color CONTENT_BG   = Color.WHITE;
 
     private CardLayout  cardLayout;
     private JPanel      contentPanel;
@@ -30,12 +34,11 @@ public class MainFrame extends JFrame {
         setTitle("Controle de Estoque");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 780);
-        setMinimumSize(new Dimension(950, 620));
+        setMinimumSize(new Dimension(900, 580));
         setLocationRelativeTo(null);
         buildUI();
     }
 
-    // ------------------------------------------------------------------ UI
     private void buildUI() {
         setLayout(new BorderLayout());
         add(buildSidebar(), BorderLayout.WEST);
@@ -45,6 +48,7 @@ public class MainFrame extends JFrame {
     private JPanel buildContent() {
         cardLayout   = new CardLayout();
         contentPanel = new JPanel(cardLayout);
+        contentPanel.setBackground(CONTENT_BG);
 
         dashboardPanel  = new DashboardPanel();
         produtosPanel   = new ProdutosPanel();
@@ -60,99 +64,99 @@ public class MainFrame extends JFrame {
         return contentPanel;
     }
 
+    // ================================================================ sidebar
     private JPanel buildSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setPreferredSize(new Dimension(200, 0));
+        sidebar.setPreferredSize(new Dimension(170, 0));
+        sidebar.setBorder(new MatteBorder(0, 0, 0, 1, SIDEBAR_BORD));
 
         sidebar.add(buildLogo());
-        sidebar.add(buildSeparator());
-        sidebar.add(Box.createVerticalStrut(8));
+        sidebar.add(buildSep());
+        sidebar.add(Box.createVerticalStrut(10));
 
-        JLabel nav = new JLabel("  NAVEGAÇÃO");
+        JLabel nav = new JLabel("  MENU");
         nav.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        nav.setForeground(TEXT_DIM);
-        nav.setMaximumSize(new Dimension(200, 24));
+        nav.setForeground(new Color(160, 163, 180));
+        nav.setMaximumSize(new Dimension(170, 22));
         sidebar.add(nav);
-        sidebar.add(Box.createVerticalStrut(6));
+        sidebar.add(Box.createVerticalStrut(4));
 
-        // ── itens do menu (sem emoji — fonte do sistema não suporta)
         String[][] items = {
-            {"Dashboard",   "dashboard"},
-            {"Produtos",    "produtos"},
-            {"Estoque",     "estoque"},
-            {"Descartes",   "descartes"},
+            {"Dashboard",  "dashboard"},
+            {"Produtos",   "produtos"},
+            {"Estoque",    "estoque"},
+            {"Descartes",  "descartes"},
         };
 
         boolean first = true;
         for (String[] item : items) {
             JButton btn = navButton(item[0], item[1]);
             sidebar.add(btn);
-            sidebar.add(Box.createVerticalStrut(3));
             if (first) { activateButton(btn); first = false; }
         }
 
         sidebar.add(Box.createVerticalGlue());
 
-        JLabel ver = new JLabel("  v1.0  \u2022  2025");
+        JLabel ver = new JLabel("  v1.0");
         ver.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        ver.setForeground(TEXT_DIM);
-        ver.setBorder(new EmptyBorder(10, 10, 12, 10));
+        ver.setForeground(new Color(180, 183, 195));
+        ver.setBorder(new EmptyBorder(8, 10, 12, 10));
         sidebar.add(ver);
 
         return sidebar;
     }
 
     private Component buildLogo() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 18));
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBackground(SIDEBAR_BG);
-        p.setMaximumSize(new Dimension(200, 72));
-
-        JPanel text = new JPanel();
-        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-        text.setBackground(SIDEBAR_BG);
+        p.setBorder(new EmptyBorder(18, 14, 14, 14));
+        p.setMaximumSize(new Dimension(170, 72));
 
         JLabel title = new JLabel("Estoque Pro");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        title.setForeground(new Color(20, 22, 35));
+        title.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel sub = new JLabel("Controle de Estoque");
         sub.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        sub.setForeground(TEXT_DIM);
+        sub.setForeground(new Color(150, 153, 170));
+        sub.setAlignmentX(LEFT_ALIGNMENT);
 
-        text.add(title);
-        text.add(sub);
-        p.add(text);
+        p.add(title);
+        p.add(Box.createVerticalStrut(2));
+        p.add(sub);
         return p;
     }
 
-    private Component buildSeparator() {
+    private Component buildSep() {
         JSeparator s = new JSeparator();
-        s.setForeground(new Color(45, 45, 65));
-        s.setMaximumSize(new Dimension(200, 1));
+        s.setForeground(SIDEBAR_BORD);
+        s.setMaximumSize(new Dimension(170, 1));
         return s;
     }
 
     private JButton navButton(String label, String card) {
         JButton btn = new JButton(label);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btn.setForeground(TEXT_DIM);
+        btn.setForeground(TEXT_NAV);
         btn.setBackground(SIDEBAR_BG);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
-        btn.setMaximumSize(new Dimension(196, 42));
-        btn.setPreferredSize(new Dimension(196, 42));
+        btn.setMaximumSize(new Dimension(170, 38));
+        btn.setPreferredSize(new Dimension(170, 38));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(10, 18, 10, 18));
+        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
 
         btn.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
-                if (btn != activeButton) { btn.setBackground(HOVER_BG); btn.setForeground(Color.WHITE); }
+                if (btn != activeButton) { btn.setBackground(HOVER_BG); btn.setForeground(HOVER_FG); }
             }
             @Override public void mouseExited(MouseEvent e) {
-                if (btn != activeButton) { btn.setBackground(SIDEBAR_BG); btn.setForeground(TEXT_DIM); }
+                if (btn != activeButton) { btn.setBackground(SIDEBAR_BG); btn.setForeground(TEXT_NAV); }
             }
         });
 
@@ -169,13 +173,13 @@ public class MainFrame extends JFrame {
     private void activateButton(JButton btn) {
         activeButton = btn;
         btn.setBackground(ACTIVE_BG);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(ACTIVE_FG);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
     }
 
     private void deactivateButton(JButton btn) {
         btn.setBackground(SIDEBAR_BG);
-        btn.setForeground(TEXT_DIM);
+        btn.setForeground(TEXT_NAV);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
     }
 

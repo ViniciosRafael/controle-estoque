@@ -20,6 +20,7 @@ public class DescartesPanel extends JPanel {
     private JLabel            lblTotal;
 
     public DescartesPanel() {
+        setBackground(Color.WHITE);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -34,7 +35,8 @@ public class DescartesPanel extends JPanel {
         p.setOpaque(false);
 
         JLabel title = new JLabel("Registro de Descartes");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(new Color(20, 22, 35));
         p.add(title, BorderLayout.WEST);
 
         JButton btnNovo = ProdutosPanel.actionButton("+ Novo Descarte", new Color(185, 50, 50));

@@ -21,6 +21,7 @@ public class ProdutosPanel extends JPanel {
     private JTable            perecTable, naoTable;
 
     public ProdutosPanel() {
+        setBackground(Color.WHITE);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -34,7 +35,8 @@ public class ProdutosPanel extends JPanel {
         p.setOpaque(false);
 
         JLabel title = new JLabel("Produtos");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(new Color(20, 22, 35));
         p.add(title, BorderLayout.WEST);
 
         JButton btnNovo = actionButton("+ Novo Produto", new Color(16, 163, 127));
@@ -81,7 +83,7 @@ public class ProdutosPanel extends JPanel {
 
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         bar.setOpaque(false);
-        JButton btnRem = actionButton("🗑  Remover", new Color(185, 50, 50));
+        JButton btnRem = actionButton("Remover", new Color(210, 50, 50));
         btnRem.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row < 0) { warn("Selecione um produto."); return; }

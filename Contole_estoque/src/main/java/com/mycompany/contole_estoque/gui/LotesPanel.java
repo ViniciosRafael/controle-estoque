@@ -21,6 +21,7 @@ public class LotesPanel extends JPanel {
     private JTable            table;
 
     public LotesPanel() {
+        setBackground(Color.WHITE);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -35,7 +36,8 @@ public class LotesPanel extends JPanel {
         p.setOpaque(false);
 
         JLabel title = new JLabel("Estoque");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(new Color(20, 22, 35));
         p.add(title, BorderLayout.WEST);
 
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
