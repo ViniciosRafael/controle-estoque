@@ -11,51 +11,47 @@ import java.time.format.DateTimeParseException;
 /**
  * Diálogo para cadastrar um novo Produto (perecível ou não perecível).
  *
- * Campos por tipo:
- *   Perecível     → Nome, Categoria, Preço Unitário, Data de Validade,
- *                   Estoque Mínimo, Quantidade do Lote inicial
- *   Não Perecível → Nome, Categoria, Preço Unitário, Estoque Mínimo
+ * Perecível     → Nome, Categoria, Preço Unitário, Estoque Mínimo, Data de Validade
+ * Não Perecível → Nome, Categoria, Preço Unitário, Estoque Mínimo
+ *
+ * Lotes são cadastrados separadamente no painel de Lotes.
  */
 public class NovoProdutoDialog extends JDialog {
 
-    // ── paleta (dark-glass)
-    private static final Color BG_DIALOG   = new Color(22, 24, 38);
-    private static final Color BG_HEADER   = new Color(28, 30, 46);
-    private static final Color BG_FIELD    = new Color(32, 35, 55);
+    // ── paleta clara
+    private static final Color BG_WHITE    = Color.WHITE;
+    private static final Color BG_HEADER   = new Color(245, 247, 250);
+    private static final Color BG_FIELD    = new Color(250, 251, 253);
+    private static final Color BORDER_CLR  = new Color(210, 213, 220);
     private static final Color ACCENT_PERC = new Color(16, 163, 127);
     private static final Color ACCENT_NAO  = new Color(0, 120, 210);
-    private static final Color BORDER_CLR  = new Color(55, 58, 82);
-    private static final Color TEXT_DIM    = new Color(140, 145, 175);
-    private static final Color TEXT_MAIN   = new Color(220, 222, 235);
+    private static final Color TEXT_DIM    = new Color(100, 105, 120);
+    private static final Color TEXT_MAIN   = new Color(30, 32, 40);
 
     // ── controles
     private JComboBox<String> cbTipo;
+    private JTextField txtNome, txtCategoria, txtPreco, txtEstMin, txtValidade;
 
-    private JTextField txtNome, txtCategoria, txtPreco, txtEstMin;
-    private JTextField txtValidade, txtQtdLote;
-
-    // painéis condicionais
-    private JPanel pnlPerecFields;   // Validade + Lote  (apenas perecível)
-    private JPanel pnlNaoFields;     // nada extra       (apenas não-perecível: já está em comum)
+    // painel com campo exclusivo de perecível
+    private JPanel pnlPerecField;
 
     private JButton btnSave;
 
     public NovoProdutoDialog(JFrame owner) {
         super(owner, "Novo Produto", true);
-        setUndecorated(false);
-        setSize(500, 540);
-        setMinimumSize(new Dimension(460, 500));
+        setSize(460, 460);
+        setMinimumSize(new Dimension(440, 420));
         setLocationRelativeTo(owner);
         setResizable(false);
         buildUI();
-        actualizarCampos();          // estado inicial
+        actualizarCampos();
     }
 
-    // ======================================================== construção UI ===
+    // =========================================================== construção UI
 
     private void buildUI() {
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(BG_DIALOG);
+        root.setBackground(BG_WHITE);
         setContentPane(root);
 
         root.add(buildHeader(),  BorderLayout.NORTH);
@@ -63,98 +59,87 @@ public class NovoProdutoDialog extends JDialog {
         root.add(buildFooter(),  BorderLayout.SOUTH);
     }
 
-    /** Cabeçalho colorido com título e ícone. */
     private JPanel buildHeader() {
-        JPanel h = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 16));
+        JPanel h = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 14));
         h.setBackground(BG_HEADER);
         h.setBorder(new MatteBorder(0, 0, 1, 0, BORDER_CLR));
 
-        JLabel icon = new JLabel("📦");
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
+        JLabel icon  = new JLabel("📦");
+        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
 
         JLabel title = new JLabel("Cadastrar Produto");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        title.setForeground(TEXT_MAIN);
 
         h.add(icon);
         h.add(title);
         return h;
     }
 
-    /** Corpo do formulário. */
     private JPanel buildBody() {
         JPanel body = new JPanel();
-        body.setBackground(BG_DIALOG);
+        body.setBackground(BG_WHITE);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-        body.setBorder(new EmptyBorder(22, 28, 10, 28));
+        body.setBorder(new EmptyBorder(18, 26, 10, 26));
 
-        // ── tipo (sempre visível)
+        // Tipo
         cbTipo = new JComboBox<>(new String[]{"Perecível", "Não Perecível"});
-        styleCombo(cbTipo);
+        cbTipo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        cbTipo.setBackground(BG_FIELD);
+        cbTipo.setForeground(TEXT_MAIN);
+        cbTipo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
+        cbTipo.setAlignmentX(LEFT_ALIGNMENT);
         cbTipo.addActionListener(e -> actualizarCampos());
+
         addRow(body, "Tipo de Produto", cbTipo);
-        body.add(sep());
+        body.add(divider());
 
-        // ── campos comuns
-        txtNome      = styledField();
-        txtCategoria = styledField();
-        txtPreco     = styledField();
-        txtEstMin    = styledField();
-        addRow(body, "Nome", txtNome);
-        addRow(body, "Categoria", txtCategoria);
-        addRow(body, "Preço Unitário (R$)", txtPreco);
-        addRow(body, "Estoque Mínimo", txtEstMin);
+        // Campos comuns
+        txtNome      = field();
+        txtCategoria = field();
+        txtPreco     = field();
+        txtEstMin    = field();
+        addRow(body, "Nome",                  txtNome);
+        addRow(body, "Categoria",             txtCategoria);
+        addRow(body, "Preço Unitário (R$)",   txtPreco);
+        addRow(body, "Estoque Mínimo",        txtEstMin);
 
-        // ── campos exclusivos de Perecível
-        pnlPerecFields = new JPanel();
-        pnlPerecFields.setBackground(BG_DIALOG);
-        pnlPerecFields.setLayout(new BoxLayout(pnlPerecFields, BoxLayout.Y_AXIS));
-        pnlPerecFields.setAlignmentX(LEFT_ALIGNMENT);
+        // Campo exclusivo: Data de Validade (perecível)
+        pnlPerecField = new JPanel();
+        pnlPerecField.setBackground(BG_WHITE);
+        pnlPerecField.setLayout(new BoxLayout(pnlPerecField, BoxLayout.Y_AXIS));
+        pnlPerecField.setAlignmentX(LEFT_ALIGNMENT);
 
-        txtValidade = styledField();
-        txtQtdLote  = styledField();
-        addRow(pnlPerecFields, "Data de Validade (aaaa-mm-dd)", txtValidade);
-        addRow(pnlPerecFields, "Quantidade do Lote Inicial", txtQtdLote);
+        txtValidade = field();
+        addRow(pnlPerecField, "Data de Validade (aaaa-mm-dd)", txtValidade);
 
-        body.add(pnlPerecFields);
-        body.add(Box.createVerticalGlue());
+        body.add(pnlPerecField);
         return body;
     }
 
-    /** Rodapé com botões Cancelar / Salvar. */
     private JPanel buildFooter() {
-        JPanel foot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 14));
+        JPanel foot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         foot.setBackground(BG_HEADER);
         foot.setBorder(new MatteBorder(1, 0, 0, 0, BORDER_CLR));
 
         JButton btnCancel = new JButton("Cancelar");
         btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnCancel.setForeground(TEXT_DIM);
-        btnCancel.setBackground(BG_FIELD);
+        btnCancel.setBackground(new Color(235, 237, 242));
         btnCancel.setBorderPainted(false);
         btnCancel.setFocusPainted(false);
         btnCancel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnCancel.setBorder(new EmptyBorder(9, 22, 9, 22));
-        btnCancel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override public void mouseEntered(java.awt.event.MouseEvent e) {
-                btnCancel.setBackground(new Color(45, 48, 72));
-                btnCancel.setForeground(Color.WHITE);
-            }
-            @Override public void mouseExited(java.awt.event.MouseEvent e) {
-                btnCancel.setBackground(BG_FIELD);
-                btnCancel.setForeground(TEXT_DIM);
-            }
-        });
+        btnCancel.setBorder(new EmptyBorder(8, 20, 8, 20));
         btnCancel.addActionListener(e -> dispose());
 
-        btnSave = new JButton("✔  Salvar");
+        btnSave = new JButton("Salvar");
         btnSave.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnSave.setForeground(Color.WHITE);
         btnSave.setBackground(ACCENT_PERC);
         btnSave.setBorderPainted(false);
         btnSave.setFocusPainted(false);
         btnSave.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnSave.setBorder(new EmptyBorder(9, 24, 9, 24));
+        btnSave.setBorder(new EmptyBorder(8, 22, 8, 22));
         btnSave.addActionListener(e -> salvar());
 
         foot.add(btnCancel);
@@ -162,31 +147,29 @@ public class NovoProdutoDialog extends JDialog {
         return foot;
     }
 
-    // ======================================================== helpers de UI ===
+    // =========================================================== helpers UI
 
     private void addRow(JPanel panel, String label, JComponent field) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lbl.setForeground(TEXT_DIM);
         lbl.setAlignmentX(LEFT_ALIGNMENT);
-        lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
 
         field.setAlignmentX(LEFT_ALIGNMENT);
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
 
-        panel.add(Box.createVerticalStrut(4));
+        panel.add(Box.createVerticalStrut(6));
         panel.add(lbl);
         panel.add(Box.createVerticalStrut(4));
         panel.add(field);
-        panel.add(Box.createVerticalStrut(6));
     }
 
-    private JTextField styledField() {
+    private JTextField field() {
         JTextField tf = new JTextField();
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tf.setForeground(TEXT_MAIN);
         tf.setBackground(BG_FIELD);
-        tf.setCaretColor(Color.WHITE);
         tf.setBorder(new CompoundBorder(
             new LineBorder(BORDER_CLR, 1, true),
             new EmptyBorder(5, 10, 5, 10)
@@ -206,47 +189,34 @@ public class NovoProdutoDialog extends JDialog {
         return tf;
     }
 
-    private void styleCombo(JComboBox<String> cb) {
-        cb.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cb.setForeground(TEXT_MAIN);
-        cb.setBackground(BG_FIELD);
-        cb.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        cb.setAlignmentX(LEFT_ALIGNMENT);
-    }
+    private Component divider() {
+        JPanel d = new JPanel();
+        d.setBackground(BORDER_CLR);
+        d.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        d.setAlignmentX(LEFT_ALIGNMENT);
 
-    private Component sep() {
-        JPanel s = new JPanel();
-        s.setBackground(BORDER_CLR);
-        s.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        s.setAlignmentX(LEFT_ALIGNMENT);
         JPanel wrap = new JPanel();
-        wrap.setBackground(BG_DIALOG);
+        wrap.setBackground(BG_WHITE);
         wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
         wrap.setAlignmentX(LEFT_ALIGNMENT);
-        wrap.add(Box.createVerticalStrut(6));
-        wrap.add(s);
-        wrap.add(Box.createVerticalStrut(10));
+        wrap.add(Box.createVerticalStrut(8));
+        wrap.add(d);
+        wrap.add(Box.createVerticalStrut(8));
         return wrap;
     }
 
-    // ======================================================= lógica dinâmica ==
+    // =========================================================== lógica
 
-    /** Mostra/esconde campos conforme tipo selecionado. */
     private void actualizarCampos() {
         boolean isPerec = cbTipo.getSelectedIndex() == 0;
-
-        pnlPerecFields.setVisible(isPerec);
-
-        // Cor do botão Salvar acompanha o tipo
+        pnlPerecField.setVisible(isPerec);
         btnSave.setBackground(isPerec ? ACCENT_PERC : ACCENT_NAO);
 
-        // Redimensiona o diálogo para não sobrar espaço vazio
-        setSize(500, isPerec ? 580 : 450);
+        // ajuste de altura conforme campos visíveis
+        setSize(460, isPerec ? 480 : 430);
         validate();
         repaint();
     }
-
-    // ============================================================= persistir ==
 
     private void salvar() {
         try {
@@ -255,9 +225,10 @@ public class NovoProdutoDialog extends JDialog {
             if (nome.isEmpty()) { err("O campo 'Nome' é obrigatório."); return; }
             if (cat.isEmpty())  { err("O campo 'Categoria' é obrigatório."); return; }
 
-            String precoTxt = txtPreco.getText().trim();
+            String precoTxt = txtPreco.getText().trim().replace(',', '.');
             if (precoTxt.isEmpty()) { err("Informe o Preço Unitário."); return; }
-            double preco = Double.parseDouble(precoTxt.replace(',', '.'));
+            double preco = Double.parseDouble(precoTxt);
+            if (preco < 0) { err("Preço Unitário não pode ser negativo."); return; }
 
             String estMinTxt = txtEstMin.getText().trim();
             if (estMinTxt.isEmpty()) { err("Informe o Estoque Mínimo."); return; }
@@ -266,26 +237,14 @@ public class NovoProdutoDialog extends JDialog {
 
             int id = EstoqueStore.get().nextId();
 
-            if (cbTipo.getSelectedIndex() == 0) {           // ── Perecível
+            if (cbTipo.getSelectedIndex() == 0) {                   // Perecível
                 String valTxt = txtValidade.getText().trim();
-                String qtdTxt = txtQtdLote.getText().trim();
                 if (valTxt.isEmpty()) { err("Informe a Data de Validade."); return; }
-                if (qtdTxt.isEmpty()) { err("Informe a Quantidade do Lote."); return; }
-
                 LocalDate validade = LocalDate.parse(valTxt);
-                int qtdLote = Integer.parseInt(qtdTxt);
-                if (qtdLote <= 0) { err("Quantidade do Lote deve ser maior que zero."); return; }
-
                 ProdutoPerecivel prod = new ProdutoPerecivel(id, nome, cat, validade, estMin, preco);
                 EstoqueStore.get().getPerec().add(prod);
-
-                int idLote = EstoqueStore.get().nextId();
-                EstoqueStore.get().getLotes().add(
-                    new com.mycompany.contole_estoque.LoteEstoque(
-                        idLote, prod, qtdLote, LocalDate.now()));
                 EstoqueStore.get().gerarAlertas();
-
-            } else {                                         // ── Não Perecível
+            } else {                                                 // Não Perecível
                 EstoqueStore.get().getNaoPerec().add(
                     new ProdutoNaoPerecivel(id, nome, cat, preco, estMin));
             }
@@ -293,7 +252,7 @@ public class NovoProdutoDialog extends JDialog {
             dispose();
 
         } catch (NumberFormatException ex) {
-            err("Valor numérico inválido. Verifique Preço, Estoque Mínimo e Quantidade.");
+            err("Valor numérico inválido. Verifique Preço Unitário e Estoque Mínimo.");
         } catch (DateTimeParseException ex) {
             err("Data inválida. Use o formato aaaa-mm-dd (ex: 2026-12-31).");
         }
