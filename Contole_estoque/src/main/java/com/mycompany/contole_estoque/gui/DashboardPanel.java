@@ -9,7 +9,10 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Painel do Dashboard — exibe cards de resumo e tabela de alertas recentes.
+ * Painel do Dashboard.
+ * Exibe cards de resumo e, abaixo, a tabela completa de alertas
+ * (vencimento e estoque mínimo) com filtro e botão de atualização.
+ * Não existe mais um painel separado de Alertas.
  */
 public class DashboardPanel extends JPanel {
 
@@ -17,9 +20,10 @@ public class DashboardPanel extends JPanel {
 
     private JLabel           lblProdutos, lblLotes, lblAlertas, lblPrejuizo;
     private DefaultTableModel alertasModel;
+    private JComboBox<String> cbFiltro;
 
     public DashboardPanel() {
-        setLayout(new BorderLayout(20, 20));
+        setLayout(new BorderLayout(0, 20));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(),  BorderLayout.NORTH);
         add(buildCenter(),  BorderLayout.CENTER);
@@ -43,23 +47,22 @@ public class DashboardPanel extends JPanel {
     }
 
     private JPanel buildCenter() {
-        JPanel center = new JPanel(new BorderLayout(0, 22));
+        JPanel center = new JPanel(new BorderLayout(0, 24));
         center.setOpaque(false);
-        center.add(buildCards(),      BorderLayout.NORTH);
-        center.add(buildAlertsTable(),BorderLayout.CENTER);
+        center.add(buildCards(),       BorderLayout.NORTH);
+        center.add(buildAlertsSection(), BorderLayout.CENTER);
         return center;
     }
 
-    // ── metric cards
+    // ── metric cards ────────────────────────────────────────────────────────
     private JPanel buildCards() {
         JPanel row = new JPanel(new GridLayout(1, 4, 16, 0));
         row.setOpaque(false);
 
-        lblProdutos = addCard(row, "Total de Produtos",   "0", new Color(0,  120, 215));
-        lblLotes    = addCard(row, "Lotes Ativos",        "0", new Color(16, 163, 127));
-        lblAlertas  = addCard(row, "Alertas Pendentes",   "0", new Color(210, 130,  0));
-        lblPrejuizo = addCard(row, "Prejuízo Acumulado","R$ 0,00", new Color(200, 50, 60));
-
+        lblProdutos = addCard(row, "Total de Produtos",  "0",       new Color(0,  120, 215));
+        lblLotes    = addCard(row, "Entradas de Estoque","0",       new Color(16, 163, 127));
+        lblAlertas  = addCard(row, "Alertas Ativos",     "0",       new Color(210, 130,  0));
+        lblPrejuizo = addCard(row, "Prejuizo Acumulado", "R$ 0,00", new Color(200,  50,  60));
         return row;
     }
 
@@ -92,34 +95,69 @@ public class DashboardPanel extends JPanel {
         return lValue;
     }
 
-    // ── alerts table
-    private JPanel buildAlertsTable() {
+    // ── seção de alertas ────────────────────────────────────────────────────
+    private JPanel buildAlertsSection() {
         JPanel section = new JPanel(new BorderLayout(0, 10));
         section.setOpaque(false);
 
-        JLabel heading = new JLabel("Alertas Recentes");
-        heading.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        section.add(heading, BorderLayout.NORTH);
+        // cabeçalho da seção
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
 
-        String[] cols = {"Tipo", "Mensagem", "Data"};
+        JLabel heading = new JLabel("Alertas do Sistema");
+        heading.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        header.add(heading, BorderLayout.WEST);
+
+        // controles (filtro + botão atualizar)
+        JPanel ctrl = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        ctrl.setOpaque(false);
+
+        JLabel lblFiltro = new JLabel("Filtrar:");
+        lblFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        cbFiltro = new JComboBox<>(new String[]{"Todos", "VENCIMENTO", "ESTOQUE_MINIMO"});
+        cbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        cbFiltro.addActionListener(e -> refreshAlertas());
+
+        JButton btnGerar = ProdutosPanel.actionButton("Atualizar Alertas", new Color(0, 120, 210));
+        btnGerar.addActionListener(e -> {
+            EstoqueStore.get().gerarAlertas();
+            refresh();
+        });
+
+        ctrl.add(lblFiltro);
+        ctrl.add(cbFiltro);
+        ctrl.add(btnGerar);
+        header.add(ctrl, BorderLayout.EAST);
+
+        section.add(header, BorderLayout.NORTH);
+        section.add(buildAlertsTable(), BorderLayout.CENTER);
+        return section;
+    }
+
+    private JScrollPane buildAlertsTable() {
+        String[] cols = {"ID", "Tipo", "Mensagem", "Data"};
         alertasModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
 
         JTable table = new JTable(alertasModel);
         styleTable(table);
-        table.getColumnModel().getColumn(0).setPreferredWidth(160);
-        table.getColumnModel().getColumn(1).setPreferredWidth(560);
-        table.getColumnModel().getColumn(2).setPreferredWidth(110);
+        table.getColumnModel().getColumn(0).setPreferredWidth(40);
+        table.getColumnModel().getColumn(1).setPreferredWidth(155);
+        table.getColumnModel().getColumn(2).setPreferredWidth(600);
+        table.getColumnModel().getColumn(3).setPreferredWidth(100);
 
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(
                     JTable t, Object v, boolean sel, boolean focus, int row, int col) {
                 Component c = super.getTableCellRendererComponent(t, v, sel, focus, row, col);
                 if (!sel) {
-                    String tipo = (String) alertasModel.getValueAt(row, 0);
-                    c.setForeground("VENCIMENTO".equals(tipo)
-                        ? new Color(255, 170, 0) : new Color(255, 90, 90));
+                    String tipo = (String) alertasModel.getValueAt(row, 1);
+                    if ("VENCIMENTO".equals(tipo))
+                        c.setForeground(new Color(255, 170, 0));
+                    else
+                        c.setForeground(new Color(255, 90, 90));
                 }
                 return c;
             }
@@ -127,8 +165,7 @@ public class DashboardPanel extends JPanel {
 
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createEmptyBorder());
-        section.add(sp, BorderLayout.CENTER);
-        return section;
+        return sp;
     }
 
     // ----------------------------------------------------------------- refresh
@@ -143,9 +180,18 @@ public class DashboardPanel extends JPanel {
         double prej = s.getDescartes().stream().mapToDouble(Descarte::calcularPrejuizo).sum();
         lblPrejuizo.setText(String.format("R$ %.2f", prej).replace('.', ','));
 
+        refreshAlertas();
+    }
+
+    private void refreshAlertas() {
         alertasModel.setRowCount(0);
-        for (Alerta a : s.getAlertas()) {
-            alertasModel.addRow(new Object[]{ a.getTipo(), a.getMensagem(), a.getData().format(FMT) });
+        String filtro = (String) cbFiltro.getSelectedItem();
+        for (Alerta a : EstoqueStore.get().getAlertas()) {
+            if ("Todos".equals(filtro) || a.getTipo().equals(filtro)) {
+                alertasModel.addRow(new Object[]{
+                    a.getAlertaId(), a.getTipo(), a.getMensagem(), a.getData().format(FMT)
+                });
+            }
         }
     }
 

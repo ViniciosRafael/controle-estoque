@@ -1,59 +1,64 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.contole_estoque;
 
 import java.time.LocalDate;
 
 /**
+ * Representa uma entrada de estoque vinculada a qualquer produto
+ * (perecível ou não perecível).
  *
- * @author vinic
+ * Para produtos perecíveis, os métodos isVencido() e diasParaVencer()
+ * delegam para ProdutoPerecivel. Para não perecíveis, retornam valores
+ * neutros (nunca vencido, Integer.MAX_VALUE dias).
  */
 public class LoteEstoque {
-    private int idLote;
-    private ProdutoPerecivel produto;
-    private int quantidade;
+
+    private int       idLote;
+    private Produto   produto;       // agora aceita qualquer Produto
+    private int       quantidade;
     private LocalDate dataEntrada;
-    
-    public LoteEstoque(){}
-    
-    public LoteEstoque(int idLote, ProdutoPerecivel produto, int quantidade, LocalDate dataEntrada){
-        this.idLote = idLote;
-        this.produto = produto;
-        this.quantidade = quantidade;
+
+    public LoteEstoque() {}
+
+    public LoteEstoque(int idLote, Produto produto, int quantidade, LocalDate dataEntrada) {
+        this.idLote      = idLote;
+        this.produto     = produto;
+        this.quantidade  = quantidade;
         this.dataEntrada = dataEntrada;
     }
-    
-    /** Delega para ProdutoPerecivel: true se a data de validade já passou.
-     * @return  */
-    public boolean isVencido()   { return produto.isVencido(); }
-    
-    /** Delega para ProdutoPerecivel: dias restantes até o vencimento (negativo se já vencido).
-     * @return  */
-    public int diasParaVencer() {
-        return produto.diasParaVencer();
+
+    /** true somente se o produto for perecível e já estiver vencido. */
+    public boolean isVencido() {
+        if (produto instanceof ProdutoPerecivel pp) return pp.isVencido();
+        return false;
     }
-    
-    /** Reduz a quantidade do lote em n unidades.
-     * @param qtd */
+
+    /**
+     * Dias restantes até o vencimento.
+     * Retorna Integer.MAX_VALUE para produtos não perecíveis.
+     */
+    public int diasParaVencer() {
+        if (produto instanceof ProdutoPerecivel pp) return pp.diasParaVencer();
+        return Integer.MAX_VALUE;
+    }
+
+    /** Reduz a quantidade do lote em n unidades. */
     public void darBaixa(int qtd) {
         if (qtd <= this.quantidade) {
             this.quantidade -= qtd;
-            System.out.println("Baixa de " + qtd + " itens realizada. Quantidade atual: " + this.quantidade);
+            System.out.println("Baixa de " + qtd + " itens. Quantidade atual: " + this.quantidade);
         } else {
-            System.out.println("Erro: A quantidade informada excede o total disponível no lote.");
+            System.out.println("Erro: quantidade informada excede o disponível no lote.");
         }
     }
 
-    public int getIdLote(){return idLote;}
-    public ProdutoPerecivel  getProduto(){return produto;}
-    public int getQuantidade(){return quantidade;}
-    public LocalDate getDataEntrada(){return dataEntrada;}
-    
-    public void setIdLote(int idLote){this.idLote = idLote;}
-    public void setProduto(ProdutoPerecivel  produto){this.produto = produto;}
-    public void setIQuantidade(int quantidade){this.quantidade = quantidade;}
-    public void setDataEntrada(LocalDate dataEntrada){this.dataEntrada = dataEntrada;}
+    // ─── getters / setters ───────────────────────────────────────────────────
+    public int       getIdLote()     { return idLote;      }
+    public Produto   getProduto()    { return produto;     }
+    public int       getQuantidade() { return quantidade;  }
+    public LocalDate getDataEntrada(){ return dataEntrada; }
 
+    public void setIdLote(int idLote)            { this.idLote      = idLote;      }
+    public void setProduto(Produto produto)       { this.produto     = produto;     }
+    public void setQuantidade(int quantidade)     { this.quantidade  = quantidade;  }
+    public void setDataEntrada(LocalDate d)       { this.dataEntrada = d;           }
 }

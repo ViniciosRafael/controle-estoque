@@ -36,11 +36,16 @@ public class EstoqueStore {
         for (LoteEstoque lote : lotes) {
             if (lote.getQuantidade() <= 0) continue;
 
-            int dias = lote.diasParaVencer();
-            if (lote.isVencido() || dias <= 5) {
-                alertas.add(new AlertaVencimento(id++, lote));
+            // Alerta de vencimento: apenas perecíveis
+            if (lote.getProduto() instanceof ProdutoPerecivel) {
+                int dias = lote.diasParaVencer();
+                if (lote.isVencido() || dias <= 5) {
+                    alertas.add(new AlertaVencimento(id++, lote));
+                }
             }
-            if (lote.getQuantidade() < lote.getProduto().getEstoqueMinimo()) {
+            // Alerta de estoque mínimo: todos os produtos
+            if (lote.getProduto().getEstoqueMinimo() > 0
+                    && lote.getQuantidade() < lote.getProduto().getEstoqueMinimo()) {
                 alertas.add(new AlertaEstoqueMinimo(id++, lote));
             }
         }
