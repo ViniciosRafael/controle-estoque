@@ -15,7 +15,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class ProdutosPanel extends JPanel {
 
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FMT     = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final Color             BTN_BLUE = new Color(99, 130, 255);
+    private static final Color             BTN_RED  = new Color(163, 45, 45);
 
     private DefaultTableModel perecModel, naoModel;
     private JTable            perecTable, naoTable;
@@ -39,7 +41,7 @@ public class ProdutosPanel extends JPanel {
         title.setForeground(new Color(20, 22, 35));
         p.add(title, BorderLayout.WEST);
 
-        JButton btnNovo = actionButton("+ Novo Produto", new Color(16, 163, 127));
+        JButton btnNovo = actionButton("+ Novo Produto", BTN_BLUE);
         btnNovo.addActionListener(e -> {
             new NovoProdutoDialog((JFrame) SwingUtilities.getWindowAncestor(this)).setVisible(true);
             refresh();
@@ -51,6 +53,9 @@ public class ProdutosPanel extends JPanel {
     private JTabbedPane buildTabs() {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        // FlatLaf: sublinha a aba selecionada com a cor de destaque
+        tabs.putClientProperty("JTabbedPane.tabAreaAlignment", "leading");
+        tabs.putClientProperty("JTabbedPane.minimumTabWidth", 120);
 
         // ── Perecíveis
         String[] pCols = { "ID", "Nome", "Categoria", "Preço Unit.", "Est. Mínimo" };
@@ -61,10 +66,10 @@ public class ProdutosPanel extends JPanel {
         perecTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         perecTable.getColumnModel().getColumn(4).setPreferredWidth(100);
 
-        tabs.addTab("🥩  Perecíveis", tablePanel(perecTable, perecModel, true));
+        tabs.addTab("  Perecíveis  ", tablePanel(perecTable, perecModel, true));
 
         // ── Não Perecíveis
-        String[] nCols = {"ID","Nome","Categoria","Preço Unitário","Est. Mínimo"};
+        String[] nCols = { "ID", "Nome", "Categoria", "Preço Unitário", "Est. Mínimo" };
         naoModel = emptyModel(nCols);
         naoTable = buildTable(naoModel);
         naoTable.getColumnModel().getColumn(0).setPreferredWidth(45);
@@ -72,7 +77,7 @@ public class ProdutosPanel extends JPanel {
         naoTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         naoTable.getColumnModel().getColumn(4).setPreferredWidth(100);
 
-        tabs.addTab("🥫  Não Perecíveis", tablePanel(naoTable, naoModel, false));
+        tabs.addTab("  Não Perecíveis  ", tablePanel(naoTable, naoModel, false));
         return tabs;
     }
 
@@ -83,7 +88,7 @@ public class ProdutosPanel extends JPanel {
 
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         bar.setOpaque(false);
-        JButton btnRem = actionButton("Remover", new Color(210, 50, 50));
+        JButton btnRem = actionButton("Remover", BTN_RED);
         btnRem.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row < 0) { warn("Selecione um produto."); return; }
@@ -159,11 +164,18 @@ public class ProdutosPanel extends JPanel {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
+        btn.setOpaque(true);
+        btn.putClientProperty("Button.arc", 8);
+        btn.putClientProperty("FlatLaf.style", "background: " + toHex(bg) + "; foreground: #ffffff");
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(9, 18, 9, 18));
+        btn.setBorder(new EmptyBorder(10, 16, 10, 16));
         return btn;
+    }
+
+    private static String toHex(Color c) {
+        return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
 
     private void warn(String msg) {
