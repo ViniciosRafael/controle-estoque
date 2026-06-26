@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
@@ -117,7 +118,8 @@ public class NovoProdutoDialog extends JDialog {
         pnlPerecField.setAlignmentX(LEFT_ALIGNMENT);
 
         txtValidade = field();
-        addRow(pnlPerecField, "Data de Validade (aaaa-mm-dd)", txtValidade);
+        txtValidade.setToolTipText("Ex: 31/12/2026");
+        addRow(pnlPerecField, "Data de Validade (dd/MM/aaaa)", txtValidade);
 
         body.add(pnlPerecField);
         return body;
@@ -243,7 +245,8 @@ public class NovoProdutoDialog extends JDialog {
             if (cbTipo.getSelectedIndex() == 0) {                   // Perecível
                 String valTxt = txtValidade.getText().trim();
                 if (valTxt.isEmpty()) { err("Informe a Data de Validade."); return; }
-                LocalDate validade = LocalDate.parse(valTxt);
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate validade = LocalDate.parse(valTxt, dtf);
                 ProdutoPerecivel prod = new ProdutoPerecivel(id, nome, cat, validade, estMin, preco);
                 EstoqueStore.get().getPerec().add(prod);
                 EstoqueStore.get().gerarAlertas();
@@ -257,7 +260,7 @@ public class NovoProdutoDialog extends JDialog {
         } catch (NumberFormatException ex) {
             err("Valor numérico inválido. Verifique Preço Unitário e Estoque Mínimo.");
         } catch (DateTimeParseException ex) {
-            err("Data inválida. Use o formato aaaa-mm-dd (ex: 2026-12-31).");
+            err("Data inválida. Use o formato dd/MM/aaaa (ex: 31/12/2026).");
         }
     }
 

@@ -24,6 +24,7 @@ public class NovoLoteDialog extends JDialog {
     private static final Color TEXT_MAIN  = new Color(30, 32, 40);
 
     private JComboBox<Produto> cbProduto;
+    private JTextField         txtLote;
     private JTextField         txtQuantidade;
 
     /** Lista unificada de todos os produtos disponíveis. */
@@ -31,7 +32,7 @@ public class NovoLoteDialog extends JDialog {
 
     public NovoLoteDialog(JFrame owner) {
         super(owner, "Nova Entrada de Estoque", true);
-        setSize(460, 300);
+        setSize(460, 350);
         setLocationRelativeTo(owner);
         setResizable(false);
         buildUI();
@@ -95,6 +96,25 @@ public class NovoLoteDialog extends JDialog {
             }
         });
 
+        txtLote = new JTextField();
+        txtLote.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtLote.setForeground(TEXT_MAIN);
+        txtLote.setBackground(BG_FIELD);
+        txtLote.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_CLR, 1, true),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+        txtLote.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override public void focusGained(java.awt.event.FocusEvent e) {
+                txtLote.setBorder(new CompoundBorder(
+                    new LineBorder(ACCENT, 1, true), new EmptyBorder(5, 10, 5, 10)));
+            }
+            @Override public void focusLost(java.awt.event.FocusEvent e) {
+                txtLote.setBorder(new CompoundBorder(
+                    new LineBorder(BORDER_CLR, 1, true), new EmptyBorder(5, 10, 5, 10)));
+            }
+        });
+
         txtQuantidade = new JTextField();
         txtQuantidade.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtQuantidade.setForeground(TEXT_MAIN);
@@ -114,8 +134,9 @@ public class NovoLoteDialog extends JDialog {
             }
         });
 
-        addRow(body, "Produto", cbProduto);
-        addRow(body, "Quantidade", txtQuantidade);
+        addRow(body, "Produto",        cbProduto);
+        addRow(body, "Número do Lote",  txtLote);
+        addRow(body, "Quantidade",      txtQuantidade);
         return body;
     }
 
@@ -175,9 +196,12 @@ public class NovoLoteDialog extends JDialog {
             int qtd = Integer.parseInt(qtdTxt);
             if (qtd <= 0) { err("Quantidade deve ser maior que zero."); return; }
 
+            String loteTxt = txtLote.getText().trim();
+            if (loteTxt.isEmpty()) { err("Informe o número do lote."); return; }
+
             int id = EstoqueStore.get().nextId();
             EstoqueStore.get().getLotes().add(
-                new LoteEstoque(id, prod, qtd, LocalDate.now()));
+                new LoteEstoque(id, loteTxt, prod, qtd, LocalDate.now()));
             EstoqueStore.get().gerarAlertas();
             dispose();
 

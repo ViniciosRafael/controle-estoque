@@ -72,7 +72,7 @@ public class LotesPanel extends JPanel {
     }
 
     private JScrollPane buildTable() {
-        String[] cols = {"#", "Produto", "Tipo", "Qtd Atual", "Est. Min.", "Data Entrada", "Validade / Status"};
+        String[] cols = {"Lote", "Produto", "Tipo", "Qtd Atual", "Est. Min.", "Data Entrada", "Validade / Status"};
         model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -148,7 +148,7 @@ public class LotesPanel extends JPanel {
             }
 
             model.addRow(new Object[]{
-                lote.getIdLote(),
+                lote.getNumeroLote(),
                 prod.getNome(),
                 tipo,
                 lote.getQuantidade(),

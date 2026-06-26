@@ -17,9 +17,9 @@ public class Contole_estoque {
     public static void main(String[] args) {
         // Configura o Look & Feel moderno antes de criar qualquer componente Swing
         FlatDarkLaf.setup();
-        UIManager.put("Button.arc",          10);
-        UIManager.put("Component.arc",       10);
-        UIManager.put("TextComponent.arc",   10);
+        UIManager.put("Button.arc", 10);
+        UIManager.put("Component.arc", 10);
+        UIManager.put("TextComponent.arc", 10);
         UIManager.put("ScrollBar.showButtons", false);
         UIManager.put("TabbedPane.showTabSeparators", true);
 

@@ -13,14 +13,16 @@ import java.time.LocalDate;
 public class LoteEstoque {
 
     private int       idLote;
+    private String    numeroLote;     // número/código do lote informado pelo usuário
     private Produto   produto;       // agora aceita qualquer Produto
     private int       quantidade;
     private LocalDate dataEntrada;
 
     public LoteEstoque() {}
 
-    public LoteEstoque(int idLote, Produto produto, int quantidade, LocalDate dataEntrada) {
+    public LoteEstoque(int idLote, String numeroLote, Produto produto, int quantidade, LocalDate dataEntrada) {
         this.idLote      = idLote;
+        this.numeroLote  = numeroLote;
         this.produto     = produto;
         this.quantidade  = quantidade;
         this.dataEntrada = dataEntrada;
@@ -52,12 +54,14 @@ public class LoteEstoque {
     }
 
     // ─── getters / setters ───────────────────────────────────────────────────
-    public int       getIdLote()     { return idLote;      }
-    public Produto   getProduto()    { return produto;     }
-    public int       getQuantidade() { return quantidade;  }
-    public LocalDate getDataEntrada(){ return dataEntrada; }
+    public int       getIdLote()      { return idLote;      }
+    public String    getNumeroLote()  { return numeroLote;  }
+    public Produto   getProduto()     { return produto;     }
+    public int       getQuantidade()  { return quantidade;  }
+    public LocalDate getDataEntrada() { return dataEntrada; }
 
     public void setIdLote(int idLote)            { this.idLote      = idLote;      }
+    public void setNumeroLote(String n)          { this.numeroLote  = n;           }
     public void setProduto(Produto produto)       { this.produto     = produto;     }
     public void setQuantidade(int quantidade)     { this.quantidade  = quantidade;  }
     public void setDataEntrada(LocalDate d)       { this.dataEntrada = d;           }
