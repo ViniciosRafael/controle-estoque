@@ -11,7 +11,6 @@ package com.mycompany.contole_estoque;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.mycompany.contole_estoque.gui.MainFrame;
 import javax.swing.*;
-import java.awt.*;
 
 public class Contole_estoque {
 
