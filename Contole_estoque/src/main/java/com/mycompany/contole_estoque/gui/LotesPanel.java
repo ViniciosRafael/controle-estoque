@@ -136,12 +136,16 @@ public class LotesPanel extends JPanel {
             Produto prod = lote.getProduto();
             String tipo, statusCol;
 
-            if (prod instanceof ProdutoPerecivel pp) {
+            if (prod instanceof ProdutoPerecivel) {
                 tipo = "Perecivel";
                 int dias = lote.diasParaVencer();
                 if (lote.isVencido())  statusCol = "Vencido";
                 else if (dias <= 5)    statusCol = "Prox. Venc. (" + dias + "d)";
-                else                   statusCol = "OK  val: " + pp.getDataValidade().format(FMT);
+                else {
+                    String valStr = lote.getDataValidade() != null
+                        ? lote.getDataValidade().format(FMT) : "—";
+                    statusCol = "OK  val: " + valStr;
+                }
             } else {
                 tipo      = "Nao Perecivel";
                 statusCol = "OK  (sem vencimento)";

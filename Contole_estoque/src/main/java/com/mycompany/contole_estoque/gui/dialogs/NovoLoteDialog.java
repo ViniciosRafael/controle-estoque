@@ -6,33 +6,38 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Diálogo para registrar uma nova entrada de estoque.
- * Lista todos os produtos cadastrados (perecíveis e não perecíveis).
+ * Para produtos perecíveis exige Data de Validade do lote (dd/MM/aaaa).
  */
 public class NovoLoteDialog extends JDialog {
+
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private static final Color BG_WHITE   = Color.WHITE;
     private static final Color BG_HEADER  = new Color(245, 247, 250);
     private static final Color BG_FIELD   = new Color(250, 251, 253);
     private static final Color BORDER_CLR = new Color(210, 213, 220);
-    private static final Color ACCENT     = new Color(0, 120, 210);
+    private static final Color ACCENT     = new Color(99, 130, 255);
     private static final Color TEXT_DIM   = new Color(100, 105, 120);
     private static final Color TEXT_MAIN  = new Color(30, 32, 40);
 
     private JComboBox<Produto> cbProduto;
     private JTextField         txtLote;
     private JTextField         txtQuantidade;
+    private JTextField         txtValidade;
+    private JPanel             pnlValidade;   // linha condicional
 
-    /** Lista unificada de todos os produtos disponíveis. */
     private final List<Produto> todosProdutos = new ArrayList<>();
 
     public NovoLoteDialog(JFrame owner) {
         super(owner, "Nova Entrada de Estoque", true);
-        setSize(460, 350);
+        setSize(460, 420);
         setLocationRelativeTo(owner);
         setResizable(false);
         buildUI();
@@ -53,7 +58,7 @@ public class NovoLoteDialog extends JDialog {
         h.setBackground(BG_HEADER);
         h.setBorder(new MatteBorder(0, 0, 1, 0, BORDER_CLR));
 
-        JLabel icon  = new JLabel("📥");
+        JLabel icon  = new JLabel("\uD83D\uDCE5");
         icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
 
         JLabel title = new JLabel("Registrar Entrada de Estoque");
@@ -71,7 +76,7 @@ public class NovoLoteDialog extends JDialog {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(new EmptyBorder(18, 26, 10, 26));
 
-        // ── preenche lista unificada
+        // ── lista unificada de produtos
         todosProdutos.addAll(EstoqueStore.get().getPerec());
         todosProdutos.addAll(EstoqueStore.get().getNaoPerec());
 
@@ -89,55 +94,42 @@ public class NovoLoteDialog extends JDialog {
                     JList<?> l, Object v, int i, boolean sel, boolean focus) {
                 super.getListCellRendererComponent(l, v, i, sel, focus);
                 if (v instanceof ProdutoPerecivel pp)
-                    setText("🥩 " + pp.getNome() + "  (val: " + pp.getDataValidade() + ")");
+                    setText("\uD83E\uDD69 " + pp.getNome() + "  (perecível)");
                 else if (v instanceof ProdutoNaoPerecivel np)
-                    setText("🥫 " + np.getNome());
+                    setText("\uD83E\uDD6B " + np.getNome());
                 return this;
             }
         });
 
-        txtLote = new JTextField();
-        txtLote.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtLote.setForeground(TEXT_MAIN);
-        txtLote.setBackground(BG_FIELD);
-        txtLote.setBorder(new CompoundBorder(
-            new LineBorder(BORDER_CLR, 1, true),
-            new EmptyBorder(5, 10, 5, 10)
-        ));
-        txtLote.addFocusListener(new java.awt.event.FocusAdapter() {
-            @Override public void focusGained(java.awt.event.FocusEvent e) {
-                txtLote.setBorder(new CompoundBorder(
-                    new LineBorder(ACCENT, 1, true), new EmptyBorder(5, 10, 5, 10)));
-            }
-            @Override public void focusLost(java.awt.event.FocusEvent e) {
-                txtLote.setBorder(new CompoundBorder(
-                    new LineBorder(BORDER_CLR, 1, true), new EmptyBorder(5, 10, 5, 10)));
-            }
-        });
+        // atualiza visibilidade do campo de validade ao trocar produto
+        cbProduto.addActionListener(e -> atualizarCampoValidade());
 
-        txtQuantidade = new JTextField();
-        txtQuantidade.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtQuantidade.setForeground(TEXT_MAIN);
-        txtQuantidade.setBackground(BG_FIELD);
-        txtQuantidade.setBorder(new CompoundBorder(
-            new LineBorder(BORDER_CLR, 1, true),
-            new EmptyBorder(5, 10, 5, 10)
-        ));
-        txtQuantidade.addFocusListener(new java.awt.event.FocusAdapter() {
-            @Override public void focusGained(java.awt.event.FocusEvent e) {
-                txtQuantidade.setBorder(new CompoundBorder(
-                    new LineBorder(ACCENT, 1, true), new EmptyBorder(5, 10, 5, 10)));
-            }
-            @Override public void focusLost(java.awt.event.FocusEvent e) {
-                txtQuantidade.setBorder(new CompoundBorder(
-                    new LineBorder(BORDER_CLR, 1, true), new EmptyBorder(5, 10, 5, 10)));
-            }
-        });
+        txtLote = field();
+        txtQuantidade = field();
 
-        addRow(body, "Produto",        cbProduto);
+        // campo de validade — visível apenas para perecíveis
+        txtValidade = field();
+        txtValidade.setToolTipText("Ex: 31/12/2026");
+
+        pnlValidade = new JPanel();
+        pnlValidade.setBackground(BG_WHITE);
+        pnlValidade.setLayout(new BoxLayout(pnlValidade, BoxLayout.Y_AXIS));
+        pnlValidade.setAlignmentX(LEFT_ALIGNMENT);
+        addRow(pnlValidade, "Data de Validade (dd/MM/aaaa)", txtValidade);
+
+        addRow(body, "Produto",         cbProduto);
         addRow(body, "Número do Lote",  txtLote);
         addRow(body, "Quantidade",      txtQuantidade);
+        body.add(pnlValidade);
+
+        atualizarCampoValidade();   // estado inicial
         return body;
+    }
+
+    /** Mostra/oculta o campo de validade conforme o produto selecionado. */
+    private void atualizarCampoValidade() {
+        boolean isPerec = cbProduto.getSelectedItem() instanceof ProdutoPerecivel;
+        pnlValidade.setVisible(isPerec);
     }
 
     private JPanel buildFooter() {
@@ -159,6 +151,7 @@ public class NovoLoteDialog extends JDialog {
         btnSave.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnSave.setForeground(Color.WHITE);
         btnSave.setBackground(ACCENT);
+        btnSave.setOpaque(true);
         btnSave.setBorderPainted(false);
         btnSave.setFocusPainted(false);
         btnSave.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -186,27 +179,59 @@ public class NovoLoteDialog extends JDialog {
         panel.add(field);
     }
 
+    private JTextField field() {
+        JTextField tf = new JTextField();
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tf.setForeground(TEXT_MAIN);
+        tf.setBackground(BG_FIELD);
+        tf.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_CLR, 1, true),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+        tf.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override public void focusGained(java.awt.event.FocusEvent e) {
+                tf.setBorder(new CompoundBorder(
+                    new LineBorder(ACCENT, 1, true), new EmptyBorder(5, 10, 5, 10)));
+            }
+            @Override public void focusLost(java.awt.event.FocusEvent e) {
+                tf.setBorder(new CompoundBorder(
+                    new LineBorder(BORDER_CLR, 1, true), new EmptyBorder(5, 10, 5, 10)));
+            }
+        });
+        return tf;
+    }
+
     private void salvar() {
         try {
             Produto prod = (Produto) cbProduto.getSelectedItem();
             if (prod == null) { err("Selecione um produto."); return; }
+
+            String loteTxt = txtLote.getText().trim();
+            if (loteTxt.isEmpty()) { err("Informe o número do lote."); return; }
 
             String qtdTxt = txtQuantidade.getText().trim();
             if (qtdTxt.isEmpty()) { err("Informe a quantidade."); return; }
             int qtd = Integer.parseInt(qtdTxt);
             if (qtd <= 0) { err("Quantidade deve ser maior que zero."); return; }
 
-            String loteTxt = txtLote.getText().trim();
-            if (loteTxt.isEmpty()) { err("Informe o número do lote."); return; }
+            // Data de validade — obrigatória somente para perecíveis
+            LocalDate validade = null;
+            if (prod instanceof ProdutoPerecivel) {
+                String valTxt = txtValidade.getText().trim();
+                if (valTxt.isEmpty()) { err("Informe a Data de Validade do lote."); return; }
+                validade = LocalDate.parse(valTxt, DTF);
+            }
 
             int id = EstoqueStore.get().nextId();
             EstoqueStore.get().getLotes().add(
-                new LoteEstoque(id, loteTxt, prod, qtd, LocalDate.now()));
+                new LoteEstoque(id, loteTxt, prod, qtd, LocalDate.now(), validade));
             EstoqueStore.get().gerarAlertas();
             dispose();
 
         } catch (NumberFormatException ex) {
             err("Quantidade inválida. Digite um número inteiro.");
+        } catch (DateTimeParseException ex) {
+            err("Data de validade inválida. Use o formato dd/MM/aaaa (ex: 31/12/2026).");
         }
     }
 

@@ -36,8 +36,8 @@ public class EstoqueStore {
         for (LoteEstoque lote : lotes) {
             if (lote.getQuantidade() <= 0) continue;
 
-            // Alerta de vencimento: apenas perecíveis
-            if (lote.getProduto() instanceof ProdutoPerecivel) {
+            // Alerta de vencimento: apenas lotes com data de validade
+            if (lote.getDataValidade() != null) {
                 int dias = lote.diasParaVencer();
                 if (lote.isVencido() || dias <= 5) {
                     alertas.add(new AlertaVencimento(id++, lote));

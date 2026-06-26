@@ -53,13 +53,13 @@ public class ProdutosPanel extends JPanel {
         tabs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
         // ── Perecíveis
-        String[] pCols = {"ID","Nome","Categoria","Preço Unit.","Data Validade","Est. Mínimo","Status"};
+        String[] pCols = { "ID", "Nome", "Categoria", "Preço Unit.", "Est. Mínimo" };
         perecModel = emptyModel(pCols);
         perecTable = buildTable(perecModel);
         perecTable.getColumnModel().getColumn(0).setPreferredWidth(45);
-        perecTable.getColumnModel().getColumn(1).setPreferredWidth(210);
-        perecTable.getColumnModel().getColumn(6).setPreferredWidth(120);
-        setStatusRenderer(perecTable, 6);
+        perecTable.getColumnModel().getColumn(1).setPreferredWidth(230);
+        perecTable.getColumnModel().getColumn(3).setPreferredWidth(130);
+        perecTable.getColumnModel().getColumn(4).setPreferredWidth(100);
 
         tabs.addTab("🥩  Perecíveis", tablePanel(perecTable, perecModel, true));
 
@@ -108,12 +108,10 @@ public class ProdutosPanel extends JPanel {
     public void refresh() {
         perecModel.setRowCount(0);
         for (ProdutoPerecivel p : EstoqueStore.get().getPerec()) {
-            int dias   = p.diasParaVencer();
-            String st  = p.isVencido() ? "⛔ Vencido" : dias <= 5 ? "⚠ Próx. Venc." : "✅ OK";
-            perecModel.addRow(new Object[]{
-                p.getId(), p.getNome(), p.getCategoria(),
-                String.format("R$ %.2f", p.getPrecoUnitario()),
-                p.getDataValidade().format(FMT), p.getEstoqueMinimo(), st
+            perecModel.addRow(new Object[] {
+                    p.getId(), p.getNome(), p.getCategoria(),
+                    String.format("R$ %.2f", p.getPrecoUnitario()),
+                    p.getEstoqueMinimo()
             });
         }
         naoModel.setRowCount(0);

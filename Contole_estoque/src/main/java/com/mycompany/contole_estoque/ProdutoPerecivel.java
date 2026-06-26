@@ -8,51 +8,30 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 /**
- *
- * @author vinic
+ * Produto perecível — indica que o produto pode vencer.
+ * A data de validade específica é registrada em cada LoteEstoque,
+ * pois lotes diferentes do mesmo produto podem ter validades diferentes.
  */
 public class ProdutoPerecivel extends Produto {
-    private LocalDate dataValidade;
-    private int estoqueMinimo;
+    private int    estoqueMinimo;
     private double precoUnitario;
-    
-    public ProdutoPerecivel(){super();}
-    
-    // Construtor completo utilizando herança
-    public ProdutoPerecivel(int id, String nome, String categoria, LocalDate dataValidade, int estoqueMinimo, double precoUnitario) {
-        super(id, nome, categoria); // Invoca o construtor da classe mãe Produto
-        this.dataValidade = dataValidade;
+
+    public ProdutoPerecivel() { super(); }
+
+    public ProdutoPerecivel(int id, String nome, String categoria, int estoqueMinimo, double precoUnitario) {
+        super(id, nome, categoria);
         this.estoqueMinimo = estoqueMinimo;
         this.precoUnitario = precoUnitario;
     }
-    
-    public LocalDate getDataValidade(){return this.dataValidade;}
-    public int getEstoqueMinimo(){return this.estoqueMinimo;}
-    public double getPrecoUnitario(){return this.precoUnitario;}
-    
-    public void setDataValidade(LocalDate dataValidade){this.dataValidade = dataValidade;}
-    public void setEstoqueMinimo(int estoqueMinimo){this.estoqueMinimo = estoqueMinimo;}
-    public void setPrecoUnitario(double precoUnitario) {this.precoUnitario = precoUnitario;}
-    
-    /**
-     Verifica se a data de validade já passou em relação à data atual do sistema. treu p/ vencido false ainda não
-     * @return 
-     */
-    public boolean isVencido() {
-        return LocalDate.now().isAfter(this.dataValidade);
-    }
-    
-    /**
-     * Retorna a quantidade de dias restantes até o vencimento.
-     * Se o produto já estiver vencido, o retorno será um número negativo.
-     * @return int número de dias.
-     */
-    public int diasParaVencer() {
-        return (int) ChronoUnit.DAYS.between(LocalDate.now(), this.dataValidade);
-    }
-    
+
+    public int    getEstoqueMinimo()  { return estoqueMinimo;  }
+    public double getPrecoUnitario()  { return precoUnitario;  }
+
+    public void setEstoqueMinimo(int estoqueMinimo)       { this.estoqueMinimo = estoqueMinimo; }
+    public void setPrecoUnitario(double precoUnitario)    { this.precoUnitario = precoUnitario; }
+
     @Override
     public double calcularPrejuizo() {
-        return this.precoUnitario; 
+        return this.precoUnitario;
     }
 }
