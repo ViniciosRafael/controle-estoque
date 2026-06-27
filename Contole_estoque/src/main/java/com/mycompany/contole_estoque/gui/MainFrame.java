@@ -31,7 +31,7 @@ public class MainFrame extends JFrame {
     private DescartesPanel  descartesPanel;
 
     public MainFrame() {
-        setTitle("Controle de Estoque");
+        setTitle("Food Control");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 780);
         setMinimumSize(new Dimension(900, 580));
@@ -115,9 +115,9 @@ public class MainFrame extends JFrame {
         p.setBorder(new EmptyBorder(18, 14, 14, 14));
         p.setMaximumSize(new Dimension(170, 72));
 
-        JLabel title = new JLabel("Estoque Pro");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        title.setForeground(new Color(20, 22, 35));
+        JLabel title = new JLabel("Food Control");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        title.setForeground(Color.WHITE);
         title.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel sub = new JLabel("Controle de Estoque");
