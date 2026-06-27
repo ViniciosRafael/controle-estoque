@@ -117,7 +117,7 @@ public class MainFrame extends JFrame {
 
         JLabel title = new JLabel("Food Control");
         title.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        title.setForeground(Color.WHITE);
+        title.setForeground(Color.BLACK);
         title.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel sub = new JLabel("Controle de Estoque");
