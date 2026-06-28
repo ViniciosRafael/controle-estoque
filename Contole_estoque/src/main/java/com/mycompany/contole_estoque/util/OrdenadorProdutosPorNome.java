@@ -12,9 +12,11 @@ import java.util.List;
  * dele numa lista ou tabela), ordenar a lista por nome não altera o ID de
  * nenhum produto — apenas a posição em que cada um aparece no resultado.
  *
- * Implementação baseada em Insertion Sort (adaptada do benchmark de
- * algoritmos de ordenação do projeto de catálogo de filmes), trocando a
- * comparação numérica por comparação alfabética (String) do nome do produto.
+ * Implementação baseada em Merge Sort, trocando a comparação numérica por
+ * comparação alfabética (String) do nome do produto. Escolhido no lugar de
+ * Insertion Sort por ter complexidade O(n log n) garantida (em vez de O(n²)),
+ * o que escala muito melhor para os volumes de teste do projeto
+ * (1.000 / 10.000 / 50.000 produtos).
  */
 public class OrdenadorProdutosPorNome {
 
@@ -48,7 +50,7 @@ public class OrdenadorProdutosPorNome {
      */
     public static <T extends Produto> List<T> ordenarPorNome(List<T> produtos) {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original
-        insertionSortPorNome(ordenados);
+        mergeSortPorNome(ordenados);
         return ordenados;
     }
 
@@ -64,7 +66,7 @@ public class OrdenadorProdutosPorNome {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original
 
         long inicio = System.nanoTime();
-        insertionSortPorNome(ordenados);
+        mergeSortPorNome(ordenados);
         long fim = System.nanoTime();
 
         double tempoSegundos = (fim - inicio) / 1_000_000_000.0;
@@ -72,26 +74,49 @@ public class OrdenadorProdutosPorNome {
     }
 
     /**
-     * Insertion Sort por nome (ordem alfabética, ignorando maiúsculas/minúsculas).
-     * Lógica: desloca produtos cujo nome vem depois do nome do produto atual
-     * para a direita, até achar a posição correta para inserí-lo — mesma
-     * lógica do Insertion Sort numérico, mas comparando nomes em vez de IDs.
+     * Merge Sort por nome (ordem alfabética, ignorando maiúsculas/minúsculas).
+     * Lógica: divide a lista recursivamente pela metade até sobrarem
+     * sublistas de 0 ou 1 elemento (já "ordenadas" por definição), depois
+     * intercala (merge) essas sublistas de volta, sempre escolhendo o menor
+     * nome entre as duas frentes — complexidade O(n log n) garantida,
+     * independente da ordem inicial dos dados.
      *
      * O ID de cada Produto não é tocado: ele é um atributo do próprio objeto,
      * que apenas muda de posição dentro da lista junto com o restante dos
      * seus dados (nome, categoria, preço, etc.).
      */
-    private static <T extends Produto> void insertionSortPorNome(List<T> produtos) {
+    private static <T extends Produto> void mergeSortPorNome(List<T> produtos) {
         int n = produtos.size();
-        for (int i = 1; i < n; i++) {
-            T chave = produtos.get(i);
-            int j = i - 1;
-            while (j >= 0 && comparar(produtos.get(j), chave) > 0) {
-                produtos.set(j + 1, produtos.get(j));
-                j--;
+        if (n < 2) return; // lista vazia ou de 1 elemento já está ordenada
+
+        int meio = n / 2;
+        List<T> esquerda = new ArrayList<>(produtos.subList(0, meio));
+        List<T> direita   = new ArrayList<>(produtos.subList(meio, n));
+
+        mergeSortPorNome(esquerda);
+        mergeSortPorNome(direita);
+
+        intercalar(produtos, esquerda, direita);
+    }
+
+    /**
+     * Intercala (merge) duas sublistas já ordenadas — {@code esquerda} e
+     * {@code direita} — escrevendo o resultado combinado e ordenado de
+     * volta em {@code destino}.
+     */
+    private static <T extends Produto> void intercalar(List<T> destino, List<T> esquerda, List<T> direita) {
+        int i = 0, j = 0, k = 0;
+        int tamEsquerda = esquerda.size(), tamDireita = direita.size();
+
+        while (i < tamEsquerda && j < tamDireita) {
+            if (comparar(esquerda.get(i), direita.get(j)) <= 0) {
+                destino.set(k++, esquerda.get(i++));
+            } else {
+                destino.set(k++, direita.get(j++));
             }
-            produtos.set(j + 1, chave);
         }
+        while (i < tamEsquerda) destino.set(k++, esquerda.get(i++));
+        while (j < tamDireita)  destino.set(k++, direita.get(j++));
     }
 
     /** Compara dois produtos pelo nome, ignorando maiúsculas/minúsculas. */
