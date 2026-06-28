@@ -3,12 +3,18 @@ package com.mycompany.contole_estoque.gui;
 import com.mycompany.contole_estoque.*;
 import com.mycompany.contole_estoque.store.EstoqueStore;
 import com.mycompany.contole_estoque.config.ConfiguracoesStore;
+import com.mycompany.contole_estoque.export.ExportadorExcel;
 import com.mycompany.contole_estoque.gui.dialogs.NovoProdutoDialog;
+import com.mycompany.contole_estoque.gui.theme.Tema;
 import com.mycompany.contole_estoque.util.OrdenadorProdutosPorNome;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.*;
 import java.awt.*;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +26,14 @@ import java.util.List;
 public class ProdutosPanel extends JPanel {
 
     private static final DateTimeFormatter FMT     = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final Color             BTN_BLUE = new Color(99, 130, 255);
-    private static final Color             BTN_RED  = new Color(163, 45, 45);
+    private static final Color             BTN_BLUE = Tema.PRIMARIA;
+    private static final Color             BTN_RED  = Tema.CRITICO;
 
     private DefaultTableModel perecModel, naoModel, alfabeticaModel;
     private JTable            perecTable, naoTable, alfabeticaTable;
     private JLabel            lblTempoOrdenacao;
+
+    private JTextField txtBuscaPerec, txtBuscaNao, txtBuscaAlfabetica;
 
     private JTabbedPane tabs;
     private JPanel      perecPanel, naoPerecPanel, alfabeticaPanel;
@@ -34,7 +42,7 @@ public class ProdutosPanel extends JPanel {
     private static final String TITULO_ALFABETICA = "  Ordem Alfabética  ";
 
     public ProdutosPanel() {
-        setBackground(Color.WHITE);
+        setBackground(Tema.FUNDO);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -49,16 +57,58 @@ public class ProdutosPanel extends JPanel {
 
         JLabel title = new JLabel("Produtos");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(new Color(20, 22, 35));
+        title.setForeground(Tema.TEXTO_TITULO);
         p.add(title, BorderLayout.WEST);
+
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        btns.setOpaque(false);
+
+        JButton btnExportar = actionButton("Exportar p/ Excel", Tema.ACENTO);
+        btnExportar.addActionListener(e -> exportarParaExcel());
+        btns.add(btnExportar);
 
         JButton btnNovo = actionButton("+ Novo Produto", BTN_BLUE);
         btnNovo.addActionListener(e -> {
             new NovoProdutoDialog((JFrame) SwingUtilities.getWindowAncestor(this)).setVisible(true);
             refresh();
         });
-        p.add(btnNovo, BorderLayout.EAST);
+        btns.add(btnNovo);
+
+        p.add(btns, BorderLayout.EAST);
         return p;
+    }
+
+    /**
+     * Abre um seletor de arquivos para o usuário escolher onde salvar o
+     * Excel, gera o arquivo com {@link ExportadorExcel} (Perecíveis, Não
+     * Perecíveis, Estoque/Lotes e Descartes, cada um em sua própria aba)
+     * e avisa o resultado.
+     */
+    private void exportarParaExcel() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Salvar planilha Excel");
+        chooser.setSelectedFile(new java.io.File("estoque.xlsx"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Planilha Excel (*.xlsx)", "xlsx"));
+
+        int resultado = chooser.showSaveDialog(this);
+        if (resultado != JFileChooser.APPROVE_OPTION) return;
+
+        java.io.File arquivo = chooser.getSelectedFile();
+        String caminho = arquivo.getAbsolutePath();
+        if (!caminho.toLowerCase().endsWith(".xlsx")) {
+            caminho += ".xlsx";
+        }
+
+        try {
+            ExportadorExcel.exportar(caminho);
+            JOptionPane.showMessageDialog(this,
+                    "Dados exportados com sucesso para:\n" + caminho,
+                    "Exportação concluída", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao exportar para Excel:\n" + ex.getMessage(),
+                    "Erro na exportação", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JTabbedPane buildTabs() {
@@ -76,7 +126,9 @@ public class ProdutosPanel extends JPanel {
         perecTable.getColumnModel().getColumn(1).setPreferredWidth(230);
         perecTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         perecTable.getColumnModel().getColumn(4).setPreferredWidth(100);
-        perecPanel = tablePanel(perecTable, perecModel, true);
+        txtBuscaPerec = buildCampoBusca();
+        txtBuscaPerec.getDocument().addDocumentListener(simpleListener(this::refreshPerec));
+        perecPanel = tablePanel(perecTable, perecModel, true, txtBuscaPerec);
 
         // ── Não Perecíveis
         String[] nCols = { "ID", "Nome", "Categoria", "Preço Unitário", "Est. Mínimo" };
@@ -86,7 +138,9 @@ public class ProdutosPanel extends JPanel {
         naoTable.getColumnModel().getColumn(1).setPreferredWidth(220);
         naoTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         naoTable.getColumnModel().getColumn(4).setPreferredWidth(100);
-        naoPerecPanel = tablePanel(naoTable, naoModel, false);
+        txtBuscaNao = buildCampoBusca();
+        txtBuscaNao.getDocument().addDocumentListener(simpleListener(this::refreshNaoPerec));
+        naoPerecPanel = tablePanel(naoTable, naoModel, false, txtBuscaNao);
 
         // ── Ordem Alfabética (todos os produtos, perecíveis + não perecíveis)
         String[] aCols = { "ID", "Nome", "Categoria", "Tipo" };
@@ -100,12 +154,15 @@ public class ProdutosPanel extends JPanel {
         alfabeticaPanel.setOpaque(false);
         alfabeticaPanel.setBorder(new EmptyBorder(8, 0, 0, 0));
 
-        JPanel alfabeticaBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel alfabeticaBar = new JPanel(new BorderLayout(8, 0));
         alfabeticaBar.setOpaque(false);
+        txtBuscaAlfabetica = buildCampoBusca();
+        txtBuscaAlfabetica.getDocument().addDocumentListener(simpleListener(this::refreshOrdemAlfabetica));
+        alfabeticaBar.add(txtBuscaAlfabetica, BorderLayout.WEST);
         lblTempoOrdenacao = new JLabel("Tempo de ordenação: -");
         lblTempoOrdenacao.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblTempoOrdenacao.setForeground(new Color(120, 125, 145));
-        alfabeticaBar.add(lblTempoOrdenacao);
+        lblTempoOrdenacao.setForeground(Tema.TEXTO_SUB);
+        alfabeticaBar.add(lblTempoOrdenacao, BorderLayout.EAST);
         alfabeticaPanel.add(alfabeticaBar, BorderLayout.NORTH);
 
         JScrollPane alfabeticaScroll = new JScrollPane(alfabeticaTable);
@@ -143,26 +200,32 @@ public class ProdutosPanel extends JPanel {
         tabs.addTab(TITULO_ALFABETICA, alfabeticaPanel);
     }
 
-    private JPanel tablePanel(JTable table, DefaultTableModel model, boolean isPerec) {
+    private JPanel tablePanel(JTable table, DefaultTableModel model, boolean isPerec, JTextField campoBusca) {
         JPanel p = new JPanel(new BorderLayout(0, 8));
         p.setOpaque(false);
         p.setBorder(new EmptyBorder(8, 0, 0, 0));
 
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel bar = new JPanel(new BorderLayout(8, 0));
         bar.setOpaque(false);
+        bar.add(campoBusca, BorderLayout.WEST);
+
+        JPanel direita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        direita.setOpaque(false);
         JButton btnRem = actionButton("Remover", BTN_RED);
         btnRem.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row < 0) { warn("Selecione um produto."); return; }
+            int viewRow = table.getSelectedRow();
+            if (viewRow < 0) { warn("Selecione um produto."); return; }
+            int modelRow = table.convertRowIndexToModel(viewRow);
             if (JOptionPane.showConfirmDialog(this, "Remover produto selecionado?",
                     "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                int id = (int) model.getValueAt(row, 0);
+                int id = (int) model.getValueAt(modelRow, 0);
                 if (isPerec) EstoqueStore.get().getPerec().removeIf(pp -> pp.getId() == id);
                 else         EstoqueStore.get().getNaoPerec().removeIf(pp -> pp.getId() == id);
                 refresh();
             }
         });
-        bar.add(btnRem);
+        direita.add(btnRem);
+        bar.add(direita, BorderLayout.EAST);
         p.add(bar, BorderLayout.NORTH);
 
         JScrollPane sp = new JScrollPane(table);
@@ -174,7 +237,12 @@ public class ProdutosPanel extends JPanel {
     // ----------------------------------------------------------------- refresh
     public void refresh() {
         atualizarVisibilidadeAbas();
+        refreshPerec();
+        refreshNaoPerec();
+        refreshOrdemAlfabetica();
+    }
 
+    private void refreshPerec() {
         perecModel.setRowCount(0);
         for (ProdutoPerecivel p : EstoqueStore.get().getPerec()) {
             perecModel.addRow(new Object[] {
@@ -183,6 +251,10 @@ public class ProdutosPanel extends JPanel {
                     p.getEstoqueMinimo()
             });
         }
+        aplicarFiltro(perecTable, txtBuscaPerec, 1);
+    }
+
+    private void refreshNaoPerec() {
         naoModel.setRowCount(0);
         for (ProdutoNaoPerecivel p : EstoqueStore.get().getNaoPerec()) {
             naoModel.addRow(new Object[]{
@@ -191,7 +263,7 @@ public class ProdutosPanel extends JPanel {
                 p.getEstoqueMinimo()
             });
         }
-        refreshOrdemAlfabetica();
+        aplicarFiltro(naoTable, txtBuscaNao, 1);
     }
 
     /**
@@ -214,10 +286,86 @@ public class ProdutosPanel extends JPanel {
                     p.getId(), p.getNome(), p.getCategoria(), tipo
             });
         }
+        aplicarFiltro(alfabeticaTable, txtBuscaAlfabetica, 1);
 
         lblTempoOrdenacao.setText(String.format(
                 "Tempo de ordenação: %.3f ms (%d produtos)",
                 resultado.getTempoMilissegundos(), todos.size()));
+    }
+
+    /**
+     * Filtra as linhas da tabela mantendo apenas as que COMEÇAM com o texto
+     * digitado no campo de busca — considerando tanto o ID (coluna 0) quanto
+     * o nome do produto (coluna {@code colunaNome}). A busca não diferencia
+     * maiúsculas de minúsculas.
+     *
+     * Exemplos: digitar "alf" encontra "Alface" (pelo nome); digitar "52"
+     * encontra o produto com ID 52, ou ID 520, 521... (pelo ID); digitar "q"
+     * encontra "Queijo" mas NÃO "Requeijão" (não começa com "q").
+     *
+     * Usa {@link RowFilter}, que filtra apenas a exibição (a tabela
+     * continua mostrando os dados reais do model por trás).
+     */
+    private void aplicarFiltro(JTable table, JTextField campoBusca, int colunaNome) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+        // Tabelas grandes (ex.: 50.000 linhas) precisam de um TableRowSorter
+        // já associado ao model; criamos um apenas uma vez por tabela.
+        TableRowSorter<DefaultTableModel> sorter = getOrCreateSorter(table, model);
+
+        String texto = campoBusca.getText().trim();
+        if (texto.isEmpty()) {
+            sorter.setRowFilter(null);
+            return;
+        }
+
+        String textoLower = texto.toLowerCase();
+        sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+            @Override public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                // Coluna 0 = ID (número) — compara como texto, ex: "52" casa com ID 52, 520, 521...
+                String id = String.valueOf(entry.getValue(0));
+                if (id.startsWith(textoLower)) return true;
+
+                // Coluna colunaNome = Nome do produto
+                Object valorNome = entry.getValue(colunaNome);
+                String nome = (valorNome == null ? "" : valorNome.toString()).toLowerCase();
+                return nome.startsWith(textoLower);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private TableRowSorter<DefaultTableModel> getOrCreateSorter(JTable table, DefaultTableModel model) {
+        if (table.getRowSorter() instanceof TableRowSorter) {
+            return (TableRowSorter<DefaultTableModel>) table.getRowSorter();
+        }
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+        return sorter;
+    }
+
+    /** Cria um campo de texto estilizado para busca, com texto de dica (placeholder). */
+    private JTextField buildCampoBusca() {
+        JTextField txt = new JTextField();
+        txt.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txt.putClientProperty("JTextField.placeholderText", "Pesquisar por nome...");
+        txt.putClientProperty("JTextField.showClearButton", true);
+        txt.setPreferredSize(new Dimension(240, 32));
+        txt.setColumns(20);
+        return txt;
+    }
+
+    /**
+     * Cria um DocumentListener que executa a mesma ação para qualquer
+     * mudança no campo de texto (inserir, remover ou trocar texto) —
+     * evita repetir os 3 métodos do DocumentListener em cada listener.
+     */
+    private DocumentListener simpleListener(Runnable acao) {
+        return new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e)  { acao.run(); }
+            @Override public void removeUpdate(DocumentEvent e)  { acao.run(); }
+            @Override public void changedUpdate(DocumentEvent e) { acao.run(); }
+        };
     }
 
     // ----------------------------------------------------------------- helpers
@@ -241,9 +389,9 @@ public class ProdutosPanel extends JPanel {
                 Component comp = super.getTableCellRendererComponent(t, v, sel, focus, row, c);
                 if (!sel && v != null) {
                     String s = v.toString();
-                    if (s.contains("Vencido"))      comp.setForeground(new Color(255,  80,  80));
-                    else if (s.contains("Próx"))    comp.setForeground(new Color(255, 175,   0));
-                    else                             comp.setForeground(new Color( 60, 210, 110));
+                    if (s.contains("Vencido"))      comp.setForeground(Tema.CRITICO_TXT);
+                    else if (s.contains("Próx"))    comp.setForeground(Tema.ALERTA_TXT);
+                    else                             comp.setForeground(Tema.PRIMARIA_TXT);
                 }
                 return comp;
             }
