@@ -17,20 +17,32 @@ import java.util.List;
  * Insertion Sort por ter complexidade O(n log n) garantida (em vez de O(n²)),
  * o que escala muito melhor para os volumes de teste do projeto
  * (1.000 / 10.000 / 50.000 produtos).
+ *
+ * Além do tempo de execução, a ordenação também conta:
+ *  - comparações: uma a cada comparação entre o elemento da frente da
+ *    esquerda e o da frente da direita, durante o merge;
+ *  - trocas: uma toda vez que o elemento da DIREITA é escolhido antes do
+ *    da esquerda (ou seja, "furou a fila" do bloco da esquerda).
  */
 public class OrdenadorProdutosPorNome {
 
     /**
      * Resultado de uma ordenação com medição de tempo: contém a lista já
-     * ordenada e o tempo que a ordenação levou para ser executada.
+     * ordenada, o tempo que a ordenação levou para ser executada, e quantas
+     * comparações e trocas o algoritmo realizou.
      */
     public static class ResultadoOrdenacaoPorNome<T extends Produto> {
         private final List<T> produtosOrdenados;
         private final double tempoSegundos;
+        private final long comparacoes;
+        private final long trocas;
 
-        public ResultadoOrdenacaoPorNome(List<T> produtosOrdenados, double tempoSegundos) {
+        public ResultadoOrdenacaoPorNome(List<T> produtosOrdenados, double tempoSegundos,
+                                          long comparacoes, long trocas) {
             this.produtosOrdenados = produtosOrdenados;
             this.tempoSegundos = tempoSegundos;
+            this.comparacoes = comparacoes;
+            this.trocas = trocas;
         }
 
         public List<T> getProdutosOrdenados() { return produtosOrdenados; }
@@ -40,6 +52,22 @@ public class OrdenadorProdutosPorNome {
 
         /** Tempo de execução da ordenação, em milissegundos (mais fácil de exibir na tela). */
         public double getTempoMilissegundos() { return tempoSegundos * 1000.0; }
+
+        /** Quantidade de comparações entre nomes realizadas durante a ordenação. */
+        public long getComparacoes() { return comparacoes; }
+
+        /** Quantidade de trocas (elemento da direita escolhido antes do da esquerda) realizadas. */
+        public long getTrocas() { return trocas; }
+    }
+
+    /**
+     * Contador mutável simples de comparações e trocas — equivalente às
+     * listas de 1 posição usadas no protótipo em Python para contornar a
+     * imutabilidade de variáveis capturadas em closures.
+     */
+    private static class Contador {
+        long comparacoes = 0;
+        long trocas = 0;
     }
 
     /**
@@ -50,13 +78,14 @@ public class OrdenadorProdutosPorNome {
      */
     public static <T extends Produto> List<T> ordenarPorNome(List<T> produtos) {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original
-        mergeSortPorNome(ordenados);
+        mergeSortPorNome(ordenados, new Contador());
         return ordenados;
     }
 
     /**
      * Mesmo comportamento de {@link #ordenarPorNome(List)}, mas também mede
-     * quanto tempo a ordenação levou para ser executada.
+     * quanto tempo a ordenação levou para ser executada, além de contar
+     * quantas comparações e trocas o Merge Sort realizou.
      *
      * Útil para acompanhar o desempenho do algoritmo conforme a quantidade
      * de produtos cadastrados cresce (igual à medição de tempo feita no
@@ -64,13 +93,14 @@ public class OrdenadorProdutosPorNome {
      */
     public static <T extends Produto> ResultadoOrdenacaoPorNome<T> ordenarPorNomeComTempo(List<T> produtos) {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original
+        Contador contador = new Contador();
 
         long inicio = System.nanoTime();
-        mergeSortPorNome(ordenados);
+        mergeSortPorNome(ordenados, contador);
         long fim = System.nanoTime();
 
         double tempoSegundos = (fim - inicio) / 1_000_000_000.0;
-        return new ResultadoOrdenacaoPorNome<>(ordenados, tempoSegundos);
+        return new ResultadoOrdenacaoPorNome<>(ordenados, tempoSegundos, contador.comparacoes, contador.trocas);
     }
 
     /**
@@ -85,7 +115,7 @@ public class OrdenadorProdutosPorNome {
      * que apenas muda de posição dentro da lista junto com o restante dos
      * seus dados (nome, categoria, preço, etc.).
      */
-    private static <T extends Produto> void mergeSortPorNome(List<T> produtos) {
+    private static <T extends Produto> void mergeSortPorNome(List<T> produtos, Contador contador) {
         int n = produtos.size();
         if (n < 2) return; // lista vazia ou de 1 elemento já está ordenada
 
@@ -93,26 +123,34 @@ public class OrdenadorProdutosPorNome {
         List<T> esquerda = new ArrayList<>(produtos.subList(0, meio));
         List<T> direita   = new ArrayList<>(produtos.subList(meio, n));
 
-        mergeSortPorNome(esquerda);
-        mergeSortPorNome(direita);
+        mergeSortPorNome(esquerda, contador);
+        mergeSortPorNome(direita, contador);
 
-        intercalar(produtos, esquerda, direita);
+        intercalar(produtos, esquerda, direita, contador);
     }
 
     /**
      * Intercala (merge) duas sublistas já ordenadas — {@code esquerda} e
      * {@code direita} — escrevendo o resultado combinado e ordenado de
      * volta em {@code destino}.
+     *
+     * Cada confronto entre a frente da esquerda e a frente da direita conta
+     * como uma comparação; toda vez que o elemento da direita é escolhido
+     * antes do da esquerda, conta como uma troca (ele "furou a fila" do
+     * bloco da esquerda).
      */
-    private static <T extends Produto> void intercalar(List<T> destino, List<T> esquerda, List<T> direita) {
+    private static <T extends Produto> void intercalar(List<T> destino, List<T> esquerda, List<T> direita,
+                                                         Contador contador) {
         int i = 0, j = 0, k = 0;
         int tamEsquerda = esquerda.size(), tamDireita = direita.size();
 
         while (i < tamEsquerda && j < tamDireita) {
+            contador.comparacoes++;
             if (comparar(esquerda.get(i), direita.get(j)) <= 0) {
                 destino.set(k++, esquerda.get(i++));
             } else {
                 destino.set(k++, direita.get(j++));
+                contador.trocas++;
             }
         }
         while (i < tamEsquerda) destino.set(k++, esquerda.get(i++));
