@@ -1,8 +1,11 @@
 com\mycompany\contole_estoque\gui\dialogs\NovoProdutoDialog$1.class
 com\mycompany\contole_estoque\LoteEstoque.class
 com\mycompany\contole_estoque\gui\AlertasPanel$1.class
+com\mycompany\contole_estoque\gui\ConfiguracoesPanel.class
 com\mycompany\contole_estoque\gui\dialogs\NovoLoteDialog.class
 com\mycompany\contole_estoque\gui\MainFrame$1.class
+com\mycompany\contole_estoque\config\ConfiguracoesStore.class
+com\mycompany\contole_estoque\util\OrdenadorProdutosPorNome.class
 com\mycompany\contole_estoque\gui\LotesPanel.class
 com\mycompany\contole_estoque\gui\ProdutosPanel$1.class
 com\mycompany\contole_estoque\gui\DescartesPanel$2.class
@@ -24,6 +27,7 @@ com\mycompany\contole_estoque\gui\AlertasPanel$2.class
 com\mycompany\contole_estoque\gui\DashboardPanel$2.class
 com\mycompany\contole_estoque\gui\LotesPanel$1.class
 com\mycompany\contole_estoque\ProdutoNaoPerecivel.class
+com\mycompany\contole_estoque\util\OrdenadorProdutosPorNome$ResultadoOrdenacaoPorNome.class
 com\mycompany\contole_estoque\gui\dialogs\NovoProdutoDialog.class
 com\mycompany\contole_estoque\gui\LotesPanel$2.class
 com\mycompany\contole_estoque\Produto.class

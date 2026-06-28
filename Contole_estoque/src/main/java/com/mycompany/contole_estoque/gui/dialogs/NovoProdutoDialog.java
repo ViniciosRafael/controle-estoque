@@ -1,10 +1,14 @@
 package com.mycompany.contole_estoque.gui.dialogs;
 
 import com.mycompany.contole_estoque.*;
+import com.mycompany.contole_estoque.config.ConfiguracoesStore;
 import com.mycompany.contole_estoque.store.EstoqueStore;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import static java.awt.Component.LEFT_ALIGNMENT;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Diálogo para cadastrar um novo Produto (perecível ou não perecível).
@@ -78,8 +82,8 @@ public class NovoProdutoDialog extends JDialog {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(new EmptyBorder(18, 26, 10, 26));
 
-        // Tipo
-        cbTipo = new JComboBox<>(new String[]{"Perecível", "Não Perecível"});
+        // Tipo — só lista os tipos atualmente habilitados em Configurações
+        cbTipo = new JComboBox<>(tiposDisponiveis());
         cbTipo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cbTipo.setBackground(BG_FIELD);
         cbTipo.setForeground(TEXT_MAIN);
@@ -135,6 +139,14 @@ public class NovoProdutoDialog extends JDialog {
     }
 
     // =========================================================== helpers UI
+    /** Monta a lista de tipos de produto liberados em Configurações para novo cadastro. */
+    private String[] tiposDisponiveis() {
+        List<String> tipos = new ArrayList<>();
+        if (ConfiguracoesStore.get().isPereciveisHabilitados())    tipos.add("Perecível");
+        if (ConfiguracoesStore.get().isNaoPereciveisHabilitados()) tipos.add("Não Perecível");
+        return tipos.toArray(new String[0]);
+    }
+
     private void addRow(JPanel panel, String label, JComponent field) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -194,6 +206,11 @@ public class NovoProdutoDialog extends JDialog {
     // =========================================================== lógica
     private void salvar() {
         try {
+            if (cbTipo.getItemCount() == 0) {
+                err("Nenhum tipo de produto está habilitado em Configurações.");
+                return;
+            }
+
             String nome = txtNome.getText().trim();
             String cat  = txtCategoria.getText().trim();
             if (nome.isEmpty()) { err("O campo 'Nome' é obrigatório."); return; }
@@ -210,8 +227,9 @@ public class NovoProdutoDialog extends JDialog {
             if (estMin < 0) { err("Estoque Mínimo não pode ser negativo."); return; }
 
             int id = EstoqueStore.get().nextId();
+            String tipoSelecionado = (String) cbTipo.getSelectedItem();
 
-            if (cbTipo.getSelectedIndex() == 0) {           // Perecível
+            if ("Perecível".equals(tipoSelecionado)) {
                 EstoqueStore.get().getPerec().add(
                     new ProdutoPerecivel(id, nome, cat, estMin, preco));
             } else {                                        // Não Perecível

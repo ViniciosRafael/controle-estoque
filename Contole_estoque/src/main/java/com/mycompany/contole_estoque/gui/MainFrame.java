@@ -4,6 +4,7 @@ import com.mycompany.contole_estoque.gui.dialogs.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import static java.awt.Component.LEFT_ALIGNMENT;
 import java.awt.event.*;
 
 /**
@@ -29,6 +30,7 @@ public class MainFrame extends JFrame {
     private ProdutosPanel   produtosPanel;
     private LotesPanel      lotesPanel;
     private DescartesPanel  descartesPanel;
+    private ConfiguracoesPanel configuracoesPanel;
 
     public MainFrame() {
         setTitle("Food Control");
@@ -54,11 +56,13 @@ public class MainFrame extends JFrame {
         produtosPanel   = new ProdutosPanel();
         lotesPanel      = new LotesPanel();
         descartesPanel  = new DescartesPanel();
+        configuracoesPanel = new ConfiguracoesPanel();
 
         contentPanel.add(dashboardPanel,  "dashboard");
         contentPanel.add(produtosPanel,   "produtos");
         contentPanel.add(lotesPanel,      "estoque");
         contentPanel.add(descartesPanel,  "descartes");
+        contentPanel.add(configuracoesPanel, "configuracoes");
 
         cardLayout.show(contentPanel, "dashboard");
         return contentPanel;
@@ -88,6 +92,7 @@ public class MainFrame extends JFrame {
             {"Produtos",   "produtos"},
             {"Estoque",    "estoque"},
             {"Descartes",  "descartes"},
+            {"Configurações", "configuracoes"},
         };
 
         boolean first = true;
@@ -189,6 +194,7 @@ public class MainFrame extends JFrame {
             case "produtos"  -> produtosPanel.refresh();
             case "estoque"   -> lotesPanel.refresh();
             case "descartes" -> descartesPanel.refresh();
+            case "configuracoes" -> configuracoesPanel.refresh();
         }
     }
 }

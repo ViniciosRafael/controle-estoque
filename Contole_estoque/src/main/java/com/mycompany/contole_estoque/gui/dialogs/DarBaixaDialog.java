@@ -4,6 +4,7 @@ import com.mycompany.contole_estoque.LoteEstoque;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import static java.awt.Component.LEFT_ALIGNMENT;
 
 /**
  * Diálogo para dar baixa de quantidade em um lote de estoque.

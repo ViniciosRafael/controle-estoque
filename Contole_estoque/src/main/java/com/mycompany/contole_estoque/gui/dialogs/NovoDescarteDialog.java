@@ -5,6 +5,7 @@ import com.mycompany.contole_estoque.store.EstoqueStore;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import static java.awt.Component.LEFT_ALIGNMENT;
 import java.time.LocalDate;
 
 /**

@@ -56,6 +56,4 @@ public class Descarte {
     public void setQuantidadeDescartada(int quantidadeDescartada){ this.quantidadeDescartada = quantidadeDescartada; }
     public void setDataDescarte(LocalDate dataDescarte){ this.dataDescarte = dataDescarte; }
     public void setMotivo(String motivo){ this.motivo= motivo; }
-
-
 }

@@ -2,12 +2,16 @@ package com.mycompany.contole_estoque.gui;
 
 import com.mycompany.contole_estoque.*;
 import com.mycompany.contole_estoque.store.EstoqueStore;
+import com.mycompany.contole_estoque.config.ConfiguracoesStore;
 import com.mycompany.contole_estoque.gui.dialogs.NovoProdutoDialog;
+import com.mycompany.contole_estoque.util.OrdenadorProdutosPorNome;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Painel de Produtos — exibe perecíveis e não-perecíveis em abas separadas.
@@ -19,8 +23,15 @@ public class ProdutosPanel extends JPanel {
     private static final Color             BTN_BLUE = new Color(99, 130, 255);
     private static final Color             BTN_RED  = new Color(163, 45, 45);
 
-    private DefaultTableModel perecModel, naoModel;
-    private JTable            perecTable, naoTable;
+    private DefaultTableModel perecModel, naoModel, alfabeticaModel;
+    private JTable            perecTable, naoTable, alfabeticaTable;
+    private JLabel            lblTempoOrdenacao;
+
+    private JTabbedPane tabs;
+    private JPanel      perecPanel, naoPerecPanel, alfabeticaPanel;
+    private static final String TITULO_PEREC     = "  Perecíveis  ";
+    private static final String TITULO_NAO_PEREC = "  Não Perecíveis  ";
+    private static final String TITULO_ALFABETICA = "  Ordem Alfabética  ";
 
     public ProdutosPanel() {
         setBackground(Color.WHITE);
@@ -51,7 +62,7 @@ public class ProdutosPanel extends JPanel {
     }
 
     private JTabbedPane buildTabs() {
-        JTabbedPane tabs = new JTabbedPane();
+        tabs = new JTabbedPane();
         tabs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         // FlatLaf: sublinha a aba selecionada com a cor de destaque
         tabs.putClientProperty("JTabbedPane.tabAreaAlignment", "leading");
@@ -65,8 +76,7 @@ public class ProdutosPanel extends JPanel {
         perecTable.getColumnModel().getColumn(1).setPreferredWidth(230);
         perecTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         perecTable.getColumnModel().getColumn(4).setPreferredWidth(100);
-
-        tabs.addTab("  Perecíveis  ", tablePanel(perecTable, perecModel, true));
+        perecPanel = tablePanel(perecTable, perecModel, true);
 
         // ── Não Perecíveis
         String[] nCols = { "ID", "Nome", "Categoria", "Preço Unitário", "Est. Mínimo" };
@@ -76,9 +86,61 @@ public class ProdutosPanel extends JPanel {
         naoTable.getColumnModel().getColumn(1).setPreferredWidth(220);
         naoTable.getColumnModel().getColumn(3).setPreferredWidth(130);
         naoTable.getColumnModel().getColumn(4).setPreferredWidth(100);
+        naoPerecPanel = tablePanel(naoTable, naoModel, false);
 
-        tabs.addTab("  Não Perecíveis  ", tablePanel(naoTable, naoModel, false));
+        // ── Ordem Alfabética (todos os produtos, perecíveis + não perecíveis)
+        String[] aCols = { "ID", "Nome", "Categoria", "Tipo" };
+        alfabeticaModel = emptyModel(aCols);
+        alfabeticaTable = buildTable(alfabeticaModel);
+        alfabeticaTable.getColumnModel().getColumn(0).setPreferredWidth(45);
+        alfabeticaTable.getColumnModel().getColumn(1).setPreferredWidth(230);
+        alfabeticaTable.getColumnModel().getColumn(3).setPreferredWidth(120);
+
+        alfabeticaPanel = new JPanel(new BorderLayout(0, 8));
+        alfabeticaPanel.setOpaque(false);
+        alfabeticaPanel.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+        JPanel alfabeticaBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        alfabeticaBar.setOpaque(false);
+        lblTempoOrdenacao = new JLabel("Tempo de ordenação: -");
+        lblTempoOrdenacao.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblTempoOrdenacao.setForeground(new Color(120, 125, 145));
+        alfabeticaBar.add(lblTempoOrdenacao);
+        alfabeticaPanel.add(alfabeticaBar, BorderLayout.NORTH);
+
+        JScrollPane alfabeticaScroll = new JScrollPane(alfabeticaTable);
+        alfabeticaScroll.setBorder(BorderFactory.createEmptyBorder());
+        alfabeticaPanel.add(alfabeticaScroll, BorderLayout.CENTER);
+
+        atualizarVisibilidadeAbas();
+
         return tabs;
+    }
+
+    /**
+     * Adiciona ou remove as abas "Perecíveis" e "Não Perecíveis" conforme a
+     * configuração atual em {@link ConfiguracoesStore}. Quando um tipo é
+     * desabilitado em Configurações, a aba correspondente desaparece daqui;
+     * quando reabilitado, a aba volta a aparecer.
+     *
+     * A aba "Ordem Alfabética" permanece sempre visível, pois ela mostra os
+     * produtos cadastrados independentemente do tipo.
+     */
+    private void atualizarVisibilidadeAbas() {
+        boolean pereciveisHabilitados    = ConfiguracoesStore.get().isPereciveisHabilitados();
+        boolean naoPereciveisHabilitados = ConfiguracoesStore.get().isNaoPereciveisHabilitados();
+
+        // Remove todas as abas e reconstrói na ordem correta — mais simples e
+        // confiável do que tentar inserir/remover em posições específicas.
+        tabs.removeAll();
+
+        if (pereciveisHabilitados) {
+            tabs.addTab(TITULO_PEREC, perecPanel);
+        }
+        if (naoPereciveisHabilitados) {
+            tabs.addTab(TITULO_NAO_PEREC, naoPerecPanel);
+        }
+        tabs.addTab(TITULO_ALFABETICA, alfabeticaPanel);
     }
 
     private JPanel tablePanel(JTable table, DefaultTableModel model, boolean isPerec) {
@@ -111,6 +173,8 @@ public class ProdutosPanel extends JPanel {
 
     // ----------------------------------------------------------------- refresh
     public void refresh() {
+        atualizarVisibilidadeAbas();
+
         perecModel.setRowCount(0);
         for (ProdutoPerecivel p : EstoqueStore.get().getPerec()) {
             perecModel.addRow(new Object[] {
@@ -127,6 +191,33 @@ public class ProdutosPanel extends JPanel {
                 p.getEstoqueMinimo()
             });
         }
+        refreshOrdemAlfabetica();
+    }
+
+    /**
+     * Junta perecíveis e não perecíveis numa única lista, ordena por nome
+     * (mantendo o ID de cadastro de cada produto), mede o tempo gasto na
+     * ordenação e popula a tabela da aba "Ordem Alfabética".
+     */
+    private void refreshOrdemAlfabetica() {
+        List<Produto> todos = new ArrayList<>();
+        todos.addAll(EstoqueStore.get().getPerec());
+        todos.addAll(EstoqueStore.get().getNaoPerec());
+
+        OrdenadorProdutosPorNome.ResultadoOrdenacaoPorNome<Produto> resultado =
+                OrdenadorProdutosPorNome.ordenarPorNomeComTempo(todos);
+
+        alfabeticaModel.setRowCount(0);
+        for (Produto p : resultado.getProdutosOrdenados()) {
+            String tipo = (p instanceof ProdutoPerecivel) ? "Perecível" : "Não Perecível";
+            alfabeticaModel.addRow(new Object[]{
+                    p.getId(), p.getNome(), p.getCategoria(), tipo
+            });
+        }
+
+        lblTempoOrdenacao.setText(String.format(
+                "Tempo de ordenação: %.3f ms (%d produtos)",
+                resultado.getTempoMilissegundos(), todos.size()));
     }
 
     // ----------------------------------------------------------------- helpers
