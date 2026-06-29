@@ -15,7 +15,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.*;
 import java.awt.*;
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,6 @@ import java.util.List;
  */
 public class ProdutosPanel extends JPanel {
 
-    private static final DateTimeFormatter FMT     = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Color             BTN_BLUE = Tema.PRIMARIA;
     private static final Color             BTN_RED  = Tema.CRITICO;
 
@@ -216,9 +214,18 @@ public class ProdutosPanel extends JPanel {
             int viewRow = table.getSelectedRow();
             if (viewRow < 0) { warn("Selecione um produto."); return; }
             int modelRow = table.convertRowIndexToModel(viewRow);
+            int id = (int) model.getValueAt(modelRow, 0);
+
+            boolean temEstoque = EstoqueStore.get().getLotes().stream()
+                    .anyMatch(lote -> lote.getProduto() != null && lote.getProduto().getId() == id);
+            if (temEstoque) {
+                warn("Este produto possui entradas de estoque cadastradas.\n"
+                        + "Remova ou dê baixa nos lotes dele em \"Estoque\" antes de excluí-lo.");
+                return;
+            }
+
             if (JOptionPane.showConfirmDialog(this, "Remover produto selecionado?",
                     "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                int id = (int) model.getValueAt(modelRow, 0);
                 if (isPerec) EstoqueStore.get().getPerec().removeIf(pp -> pp.getId() == id);
                 else         EstoqueStore.get().getNaoPerec().removeIf(pp -> pp.getId() == id);
                 refresh();
@@ -235,7 +242,7 @@ public class ProdutosPanel extends JPanel {
     }
 
     // ----------------------------------------------------------------- refresh
-    public void refresh() {
+    private void refresh() {
         atualizarVisibilidadeAbas();
         refreshPerec();
         refreshNaoPerec();
@@ -289,8 +296,9 @@ public class ProdutosPanel extends JPanel {
         aplicarFiltro(alfabeticaTable, txtBuscaAlfabetica, 1);
 
         lblTempoOrdenacao.setText(String.format(
-                "Tempo de ordenação: %.3f ms (%d produtos)",
-                resultado.getTempoMilissegundos(), todos.size()));
+                "Tempo de ordenação: %.3f ms (%d produtos)  •  Comparações: %,d  •  Trocas: %,d",
+                resultado.getTempoMilissegundos(), todos.size(),
+                resultado.getComparacoes(), resultado.getTrocas()));
     }
 
     /**
@@ -380,23 +388,7 @@ public class ProdutosPanel extends JPanel {
         DashboardPanel.styleTable(t);
         return t;
     }
-
     /** Colorizes the status column. */
-    private void setStatusRenderer(JTable table, int col) {
-        table.getColumnModel().getColumn(col).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(
-                    JTable t, Object v, boolean sel, boolean focus, int row, int c) {
-                Component comp = super.getTableCellRendererComponent(t, v, sel, focus, row, c);
-                if (!sel && v != null) {
-                    String s = v.toString();
-                    if (s.contains("Vencido"))      comp.setForeground(Tema.CRITICO_TXT);
-                    else if (s.contains("Próx"))    comp.setForeground(Tema.ALERTA_TXT);
-                    else                             comp.setForeground(Tema.PRIMARIA_TXT);
-                }
-                return comp;
-            }
-        });
-    }
 
     static JButton actionButton(String text, Color bg) {
         JButton btn = new JButton(text);
