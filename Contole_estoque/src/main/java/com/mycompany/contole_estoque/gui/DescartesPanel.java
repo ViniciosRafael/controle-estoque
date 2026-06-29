@@ -2,7 +2,6 @@ package com.mycompany.contole_estoque.gui;
 
 import com.mycompany.contole_estoque.*;
 import com.mycompany.contole_estoque.store.EstoqueStore;
-import com.mycompany.contole_estoque.gui.dialogs.NovoDescarteDialog;
 import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -12,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Painel de Histórico de Movimentações — exibe todas as movimentações do estoque:
- * inclusões, baixas e descartes. Substitui o antigo painel de "Registro de Descartes".
+ * inclusões, baixas e descartes.
  *
  * Também exibe o total de prejuízo acumulado (calculado apenas sobre os descartes).
  */
@@ -56,18 +55,6 @@ public class DescartesPanel extends JPanel {
         cbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cbFiltro.addActionListener(e -> refresh());
         controls.add(cbFiltro);
-
-        JButton btnNovo = ProdutosPanel.actionButton("+ Novo Descarte", new Color(185, 50, 50));
-        btnNovo.addActionListener(e -> {
-            if (EstoqueStore.get().getLotes().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Nenhum lote disponível.",
-                    "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            new NovoDescarteDialog((JFrame) SwingUtilities.getWindowAncestor(this)).setVisible(true);
-            refresh();
-        });
-        controls.add(btnNovo);
 
         p.add(controls, BorderLayout.EAST);
         return p;
