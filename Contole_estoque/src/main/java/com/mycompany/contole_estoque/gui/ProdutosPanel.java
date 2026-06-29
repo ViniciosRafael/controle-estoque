@@ -55,7 +55,7 @@ public class ProdutosPanel extends JPanel {
 
         JLabel title = new JLabel("Produtos");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(Tema.TEXTO_TITULO);
+        title.setForeground(new Color(20, 22, 35));
         p.add(title, BorderLayout.WEST);
 
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
