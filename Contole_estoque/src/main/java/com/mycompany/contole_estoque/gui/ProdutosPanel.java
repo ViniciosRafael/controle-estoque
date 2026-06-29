@@ -242,7 +242,7 @@ public class ProdutosPanel extends JPanel {
     }
 
     // ----------------------------------------------------------------- refresh
-    private void refresh() {
+    void refresh() {
         atualizarVisibilidadeAbas();
         refreshPerec();
         refreshNaoPerec();
