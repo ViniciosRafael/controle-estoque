@@ -1,6 +1,5 @@
 package com.mycompany.contole_estoque.gui;
 
-import com.mycompany.contole_estoque.gui.dialogs.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -33,7 +32,7 @@ public class MainFrame extends JFrame {
     private ConfiguracoesPanel configuracoesPanel;
 
     public MainFrame() {
-        setTitle("Food Control");
+        setTitle("Flow Control");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 780);
         setMinimumSize(new Dimension(900, 580));
@@ -120,7 +119,7 @@ public class MainFrame extends JFrame {
         p.setBorder(new EmptyBorder(18, 14, 14, 14));
         p.setMaximumSize(new Dimension(170, 72));
 
-        JLabel title = new JLabel("Food Control");
+        JLabel title = new JLabel("Flow  Control");
         title.setFont(new Font("Segoe UI", Font.BOLD, 15));
         title.setForeground(Color.BLACK);
         title.setAlignmentX(LEFT_ALIGNMENT);

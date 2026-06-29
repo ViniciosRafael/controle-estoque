@@ -33,6 +33,7 @@ public class ConfiguracoesStore {
      * Não permite desabilitar os dois tipos ao mesmo tempo, pois o sistema
      * precisa de pelo menos um tipo de produto disponível para cadastro.
      *
+     * @param habilitado
      * @return true se a alteração foi aplicada; false se foi bloqueada
      *         (por deixaria os dois tipos desabilitados).
      */
@@ -48,6 +49,8 @@ public class ConfiguracoesStore {
      * Habilita ou desabilita o cadastro de produtos não perecíveis.
      * Mesma regra de segurança do método acima: ao menos um tipo precisa
      * permanecer habilitado.
+     * @param habilitado
+     * @return 
      */
     public boolean setNaoPereciveisHabilitados(boolean habilitado) {
         if (!habilitado && !pereciveisHabilitados) {

@@ -40,7 +40,7 @@ public class ProdutosPanel extends JPanel {
     private static final String TITULO_ALFABETICA = "  Ordem Alfabética  ";
 
     public ProdutosPanel() {
-        setBackground(Tema.FUNDO);
+        setBackground(Color.WHITE);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
