@@ -3,6 +3,7 @@ package com.mycompany.contole_estoque.gui.dialogs;
 import com.mycompany.contole_estoque.*;
 import com.mycompany.contole_estoque.config.ConfiguracoesStore;
 import com.mycompany.contole_estoque.store.EstoqueStore;
+import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -20,14 +21,14 @@ import java.util.List;
  */
 public class NovoProdutoDialog extends JDialog {
 
-    // ── paleta
-    private static final Color BG_WHITE    = Color.WHITE;
-    private static final Color BG_HEADER   = new Color(245, 247, 250);
-    private static final Color BG_FIELD    = new Color(250, 251, 253);
-    private static final Color BORDER_CLR  = new Color(210, 213, 220);
-    private static final Color ACCENT_BLUE = new Color(99, 130, 255);
-    private static final Color TEXT_DIM    = new Color(100, 105, 120);
-    private static final Color TEXT_MAIN   = new Color(30, 32, 40);
+    // ── paleta (delega para Tema, tema escuro)
+    private static final Color BG_WHITE    = Tema.FUNDO;
+    private static final Color BG_HEADER   = Tema.HEADER_BG;
+    private static final Color BG_FIELD    = Tema.CAMPO_BG;
+    private static final Color BORDER_CLR  = Tema.BORDA;
+    private static final Color ACCENT_BLUE = Tema.PRIMARIA;
+    private static final Color TEXT_DIM    = Tema.TEXTO_SUB;
+    private static final Color TEXT_MAIN   = Tema.TEXTO_TITULO;
 
     // ── controles
     private JComboBox<String> cbTipo;
@@ -115,7 +116,7 @@ public class NovoProdutoDialog extends JDialog {
         JButton btnCancel = new JButton("Cancelar");
         btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btnCancel.setForeground(TEXT_DIM);
-        btnCancel.setBackground(new Color(235, 237, 242));
+        btnCancel.setBackground(Tema.CAMPO_BG);
         btnCancel.setBorderPainted(false);
         btnCancel.setFocusPainted(false);
         btnCancel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -144,7 +145,7 @@ public class NovoProdutoDialog extends JDialog {
         List<String> tipos = new ArrayList<>();
         if (ConfiguracoesStore.get().isPereciveisHabilitados())    tipos.add("Perecível");
         if (ConfiguracoesStore.get().isNaoPereciveisHabilitados()) tipos.add("Não Perecível");
-        return tipos.toArray(new String[0]);
+        return tipos.toArray(String[]::new);
     }
 
     private void addRow(JPanel panel, String label, JComponent field) {
@@ -211,7 +212,7 @@ public class NovoProdutoDialog extends JDialog {
                 return;
             }
 
-            String nome = txtNome.getText().trim();
+            String nome = txtNome.getText().trim().toUpperCase();
             String cat  = txtCategoria.getText().trim();
             if (nome.isEmpty()) { err("O campo 'Nome' é obrigatório."); return; }
             if (cat.isEmpty())  { err("O campo 'Categoria' é obrigatório."); return; }

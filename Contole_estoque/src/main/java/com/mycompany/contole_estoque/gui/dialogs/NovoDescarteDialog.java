@@ -10,38 +10,70 @@ import java.time.LocalDate;
 
 /**
  * Diálogo para registrar um novo Descarte de lote.
- * Chama Descarte.registrar() que aplica darBaixa() no lote automaticamente.
+ *
+ * Correções aplicadas:
+ * - Exibe o numeroLote (código do lote) em vez do idLote interno.
+ * - Permite descartar lotes com quantidade zero (ex.: lotes vencidos já zerados).
+ * - Registra a movimentação no histórico unificado.
+ * - Suporta lote pré-selecionado quando aberto a partir da aba Estoque.
  */
 public class NovoDescarteDialog extends JDialog {
 
     private JComboBox<LoteEstoque> cbLote;
     private JTextField             txtQuantidade, txtMotivo;
 
+    /** Abre o diálogo sem pré-seleção de lote (usado na aba Histórico). */
     public NovoDescarteDialog(JFrame owner) {
-        super(owner, "Registrar Descarte", true);
-        setSize(480, 310);
-        setLocationRelativeTo(owner);
-        setResizable(false);
-        buildUI();
+        this(owner, null);
     }
 
-    private void buildUI() {
+    /** Abre o diálogo com um lote pré-selecionado (usado na aba Estoque). */
+    public NovoDescarteDialog(JFrame owner, LoteEstoque lotePre) {
+        super(owner, "Registrar Descarte", true);
+        setSize(500, 320);
+        setLocationRelativeTo(owner);
+        setResizable(false);
+        buildUI(lotePre);
+    }
+
+    private void buildUI(LoteEstoque lotePre) {
         JPanel root = new JPanel();
         root.setLayout(new BoxLayout(root, BoxLayout.Y_AXIS));
         root.setBorder(new EmptyBorder(22, 28, 22, 28));
 
         cbLote = new JComboBox<>();
         cbLote.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        int preIndex = -1;
+        int idx = 0;
         for (LoteEstoque l : EstoqueStore.get().getLotes()) {
-            if (l.getQuantidade() > 0) cbLote.addItem(l);
+            // Inclui lotes com produto válido, mesmo que quantidade seja zero
+            // (ex.: lotes vencidos que já tiveram baixa total mas ainda precisam
+            // ser formalmente descartados/registrados no histórico).
+            if (l.getProduto() != null) {
+                cbLote.addItem(l);
+                if (lotePre != null && l.getIdLote() == lotePre.getIdLote()) {
+                    preIndex = idx;
+                }
+                idx++;
+            }
         }
+
+        // Pré-seleciona o lote se foi passado como parâmetro
+        if (preIndex >= 0) {
+            cbLote.setSelectedIndex(preIndex);
+        }
+
         cbLote.setRenderer(new DefaultListCellRenderer() {
             @Override public Component getListCellRendererComponent(
                     JList<?> l, Object v, int i, boolean sel, boolean focus) {
                 super.getListCellRendererComponent(l, v, i, sel, focus);
-                if (v instanceof LoteEstoque lt)
-                    setText("Lote #" + lt.getIdLote() + "  —  " +
+                if (v instanceof LoteEstoque lt) {
+                    // Usa o numeroLote (código visível ao usuário), não o idLote interno
+                    String numLote = lt.getNumeroLote() != null ? lt.getNumeroLote() : String.valueOf(lt.getIdLote());
+                    setText("Lote: " + numLote + "  —  " +
                             lt.getProduto().getNome() + "  (qtd: " + lt.getQuantidade() + ")");
+                }
                 return this;
             }
         });
@@ -88,20 +120,37 @@ public class NovoDescarteDialog extends JDialog {
     private void registrar() {
         try {
             LoteEstoque lote = (LoteEstoque) cbLote.getSelectedItem();
-            if (lote == null) return;
-            int    qtd    = Integer.parseInt(txtQuantidade.getText().trim());
+            if (lote == null) { err("Nenhum lote disponível para descarte."); return; }
+
+            String qtdTxt = txtQuantidade.getText().trim();
+            if (qtdTxt.isEmpty()) { err("Informe a quantidade a descartar."); return; }
+            int qtd = Integer.parseInt(qtdTxt);
+
             String motivo = txtMotivo.getText().trim();
-            if (qtd <= 0 || qtd > lote.getQuantidade()) {
-                err("Quantidade inválida (máx: " + lote.getQuantidade() + ")."); return;
-            }
             if (motivo.isEmpty()) { err("Informe o motivo do descarte."); return; }
+
+            // Permite qtd=0 apenas para lotes já zerados (registro formal de descarte)
+            if (qtd < 0) { err("Quantidade não pode ser negativa."); return; }
+            if (qtd > lote.getQuantidade()) {
+                err("Quantidade inválida. Disponível no lote: " + lote.getQuantidade() + " unidades."); return;
+            }
 
             int id = EstoqueStore.get().nextId();
             Descarte d = new Descarte(id, lote, qtd, LocalDate.now(), motivo);
-            d.registrar();   // aplica darBaixa no lote automaticamente
+            // Só aplica darBaixa se ainda há quantidade (evita erro em lotes zerados)
+            if (qtd > 0) {
+                lote.darBaixa(qtd);
+            }
             EstoqueStore.get().getDescartes().add(d);
+
+            // Registra no histórico unificado de movimentações
+            int movId = EstoqueStore.get().nextId();
+            Movimentacao mov = new Movimentacao(movId, Movimentacao.Tipo.DESCARTE,
+                    lote, qtd, LocalDate.now(), motivo);
+            EstoqueStore.get().getMovimentacoes().add(mov);
+
             dispose();
-        } catch (NumberFormatException ex) { err("Quantidade inválida."); }
+        } catch (NumberFormatException ex) { err("Quantidade inválida. Digite um número inteiro."); }
     }
 
     private void err(String msg) {

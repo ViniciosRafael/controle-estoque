@@ -6,21 +6,7 @@ import java.awt.Color;
  * Paleta de cores da identidade visual FlowControl, centralizada para uso
  * em todas as telas do sistema.
  *
- * Tema escuro: fundos de janela, cards e tabelas usam tons de cinza-chumbo
- * (em vez do branco/quase-branco usado anteriormente), e os textos usam
- * tons claros para manter contraste e legibilidade.
- *
- * Significado de cada cor (conforme guia de identidade visual FlowControl):
- *  - PRIMARIA: cor de marca, usada em botões e elementos principais de ação.
- *  - ACENTO:   tom mais escuro da primária, usado em hover/estados ativos.
- *  - DESTAQUE: verde-teal claro, usado em realces suaves e fundos de chips.
- *  - ALERTA:   amber, para avisos de estoque baixo / próximo do vencimento.
- *  - CRITICO:  vermelho, para itens vencidos ou situações críticas.
- *
- * As variantes "_TXT" são versões mais claras das cores de marca, usadas
- * quando a cor aparece como TEXTO sobre fundo escuro (em vez de como fundo
- * de botão) — tons saturados e escuros perdem contraste/legibilidade
- * quando usados como texto sobre um fundo já escuro.
+ * Atualizado para TEMA CLARO conforme solicitado.
  */
 public final class Tema {
 
@@ -44,43 +30,43 @@ public final class Tema {
     /** Neutro escuro (#2C2C2A). */
     public static final Color NEUTRO = new Color(0x2C, 0x2C, 0x2A);
 
-    // ----------------------------------------------------- variantes claras
-    // (para uso como TEXTO sobre fundo escuro, em vez de fundo de botão)
+    // ----------------------------------------------------- variantes escuras para texto
+    // (para uso como TEXTO sobre fundo claro)
 
-    /** Verde-teal claro (#5DCAA5) — versão da PRIMARIA legível como texto sobre fundo escuro. */
-    public static final Color PRIMARIA_TXT = new Color(0x5D, 0xCA, 0xA5);
+    /** Verde-teal escuro — versão da PRIMARIA legível como texto sobre fundo claro. */
+    public static final Color PRIMARIA_TXT = new Color(0x0F, 0x6E, 0x56);
 
-    /** Amber claro (#FAC775) — versão da ALERTA legível como texto sobre fundo escuro. */
-    public static final Color ALERTA_TXT = new Color(0xFA, 0xC7, 0x75);
+    /** Amber escuro — versão da ALERTA legível como texto sobre fundo claro. */
+    public static final Color ALERTA_TXT = new Color(0x8A, 0x5A, 0x00);
 
-    /** Vermelho claro (#F09595) — versão da CRITICO legível como texto sobre fundo escuro. */
-    public static final Color CRITICO_TXT = new Color(0xF0, 0x95, 0x95);
+    /** Vermelho escuro — versão da CRITICO legível como texto sobre fundo claro. */
+    public static final Color CRITICO_TXT = new Color(0xA8, 0x2C, 0x2C);
 
-    // --------------------------------------------------- superfícies escuras
+    // --------------------------------------------------- superfícies claras (ATUALIZADO)
 
-    /** Fundo principal de janela/conteúdo (substitui o branco). */
-    public static final Color FUNDO = new Color(0x1E, 0x1F, 0x24);
+    /** Fundo principal de janela/conteúdo - Branco. */
+    public static final Color FUNDO = new Color(0xFF, 0xFF, 0xFF);
 
-    /** Fundo de cards, tabelas e painéis elevados (um tom mais claro que FUNDO). */
-    public static final Color CARD_BG = new Color(0x2A, 0x2B, 0x32);
+    /** Fundo de cards, tabelas e painéis elevados - Cinza muito claro. */
+    public static final Color CARD_BG = new Color(0xF8, 0xF9, 0xFC);
 
-    /** Fundo do cabeçalho de tabelas (um tom mais claro que CARD_BG). */
-    public static final Color HEADER_BG = new Color(0x2F, 0x30, 0x37);
+    /** Fundo do cabeçalho de tabelas. */
+    public static final Color HEADER_BG = new Color(0xF1, 0xF3, 0xF9);
 
     /** Fundo de campos de formulário (inputs). */
-    public static final Color CAMPO_BG = new Color(0x26, 0x27, 0x2D);
+    public static final Color CAMPO_BG = new Color(0xFF, 0xFF, 0xFF);
 
-    /** Borda padrão entre elementos sobre fundo escuro. */
-    public static final Color BORDA = new Color(0x3C, 0x3D, 0x45);
+    /** Borda padrão entre elementos. */
+    public static final Color BORDA = new Color(0xDC, 0xDE, 0xE6);
 
-    // ------------------------------------------------------- texto sobre escuro
+    // ------------------------------------------------------- texto sobre claro
 
-    /** Texto principal (títulos, valores) sobre fundo escuro — quase branco. */
-    public static final Color TEXTO_TITULO = new Color(0xF0, 0xF1, 0xF4);
+    /** Texto principal (títulos, valores) sobre fundo claro — Preto suave. */
+    public static final Color TEXTO_TITULO = new Color(0x14, 0x16, 0x23);
 
-    /** Texto secundário (subtítulos, legendas) sobre fundo escuro — cinza claro. */
-    public static final Color TEXTO_SUB = new Color(0x9A, 0x9C, 0xA6);
+    /** Texto secundário (subtítulos, legendas) sobre fundo claro — Cinza médio. */
+    public static final Color TEXTO_SUB = new Color(0x46, 0x4B, 0x5F);
 
-    /** Texto de cabeçalho de tabela sobre fundo escuro. */
-    public static final Color TEXTO_HEADER = new Color(0xB7, 0xB9, 0xC2);
+    /** Texto de cabeçalho de tabela sobre fundo claro. */
+    public static final Color TEXTO_HEADER = new Color(0x46, 0x4B, 0x5F);
 }

@@ -4,9 +4,6 @@
  */
 package com.mycompany.contole_estoque;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 /**
  * Produto perecível — indica que o produto pode vencer.
  * A data de validade específica é registrada em cada LoteEstoque,
@@ -24,6 +21,7 @@ public class ProdutoPerecivel extends Produto {
         this.precoUnitario = precoUnitario;
     }
 
+    @Override
     public int    getEstoqueMinimo()  { return estoqueMinimo;  }
     public double getPrecoUnitario()  { return precoUnitario;  }
 

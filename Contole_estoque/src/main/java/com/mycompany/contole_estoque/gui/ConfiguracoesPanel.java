@@ -1,6 +1,7 @@
 package com.mycompany.contole_estoque.gui;
 
 import com.mycompany.contole_estoque.config.ConfiguracoesStore;
+import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -16,11 +17,11 @@ import static java.awt.Component.LEFT_ALIGNMENT;
  */
 public class ConfiguracoesPanel extends JPanel {
 
-    private static final Color BG          = Color.WHITE;
-    private static final Color CARD_BG     = new Color(248, 249, 252);
-    private static final Color BORDER_CLR  = new Color(220, 222, 232);
-    private static final Color TEXT_TITLE  = new Color(20, 22, 35);
-    private static final Color TEXT_SUB    = new Color(120, 125, 145);
+    private static final Color BG          = Tema.FUNDO;
+    private static final Color CARD_BG     = Tema.CARD_BG;
+    private static final Color BORDER_CLR  = Tema.BORDA;
+    private static final Color TEXT_TITLE  = Tema.TEXTO_TITULO;
+    private static final Color TEXT_SUB    = Tema.TEXTO_SUB;
 
     private JCheckBox chkPereciveis;
     private JCheckBox chkNaoPereciveis;

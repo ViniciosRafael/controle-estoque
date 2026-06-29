@@ -32,6 +32,7 @@ public abstract class Produto {
     /**
      * Retorna o estoque mínimo configurado para o produto.
      * Subclasses que controlam estoque mínimo devem sobrescrever.
+     * @return 
      */
     public int getEstoqueMinimo() { return 0; }
 

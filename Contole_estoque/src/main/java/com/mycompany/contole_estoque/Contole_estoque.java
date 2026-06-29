@@ -23,7 +23,7 @@ public class Contole_estoque {
      *
      * Defina como 0 para iniciar com o sistema vazio (sem dados de teste).
      */
-    private static final int QUANTIDADE_DADOS_TESTE = 25_000;
+    private static final int QUANTIDADE_DADOS_TESTE = 500;
 
     public static void main(String[] args) {
         // Configura o Look & Feel moderno antes de criar qualquer componente Swing

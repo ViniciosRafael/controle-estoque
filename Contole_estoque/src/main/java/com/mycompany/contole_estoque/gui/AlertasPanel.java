@@ -93,7 +93,7 @@ public class AlertasPanel extends JPanel {
     }
 
     // ----------------------------------------------------------------- refresh
-    public void refresh() {
+    private void refresh() {
         model.setRowCount(0);
         String filtro = (String) cbFiltro.getSelectedItem();
         for (Alerta a : EstoqueStore.get().getAlertas()) {

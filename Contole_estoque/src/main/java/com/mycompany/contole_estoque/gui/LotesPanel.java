@@ -3,6 +3,7 @@ package com.mycompany.contole_estoque.gui;
 import com.mycompany.contole_estoque.*;
 import com.mycompany.contole_estoque.store.EstoqueStore;
 import com.mycompany.contole_estoque.gui.dialogs.*;
+import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
@@ -11,7 +12,12 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Painel de Estoque — lista entradas de estoque de TODOS os produtos
- * (perecíveis e não perecíveis). Permite criar novas entradas e dar baixa.
+ * (perecíveis e não perecíveis). Permite criar novas entradas, dar baixa e descartar.
+ *
+ * Correções aplicadas:
+ * - Adicionado botão "Descartar" que abre o NovoDescarteDialog pré-selecionando o lote.
+ * - Corrigida a seleção de linha para usar o índice do modelo (não da view),
+ *   evitando erros quando a tabela está ordenada/filtrada.
  */
 public class LotesPanel extends JPanel {
 
@@ -21,7 +27,7 @@ public class LotesPanel extends JPanel {
     private JTable            table;
 
     public LotesPanel() {
-        setBackground(Color.WHITE);
+        setBackground(Tema.FUNDO);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -37,7 +43,7 @@ public class LotesPanel extends JPanel {
 
         JLabel title = new JLabel("Estoque");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(new Color(20, 22, 35));
+        title.setForeground(Tema.TEXTO_TITULO);
         p.add(title, BorderLayout.WEST);
 
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -45,10 +51,24 @@ public class LotesPanel extends JPanel {
 
         JButton btnBaixa = ProdutosPanel.actionButton("Dar Baixa", new Color(200, 125, 0));
         btnBaixa.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row < 0) { warn("Selecione um item do estoque."); return; }
-            LoteEstoque lote = EstoqueStore.get().getLotes().get(row);
+            LoteEstoque lote = getLoteSelecionado();
+            if (lote == null) { warn("Selecione um item do estoque."); return; }
             new DarBaixaDialog((JFrame) SwingUtilities.getWindowAncestor(this), lote).setVisible(true);
+            EstoqueStore.get().gerarAlertas();
+            refresh();
+        });
+
+        JButton btnDescartar = ProdutosPanel.actionButton("Descartar", new Color(185, 50, 50));
+        btnDescartar.addActionListener(e -> {
+            LoteEstoque lote = getLoteSelecionado();
+            if (lote == null) { warn("Selecione um item do estoque."); return; }
+            if (lote.getProduto() == null) {
+                warn("Este lote não possui produto associado e não pode ser descartado.");
+                return;
+            }
+            NovoDescarteDialog dlg = new NovoDescarteDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this), lote);
+            dlg.setVisible(true);
             EstoqueStore.get().gerarAlertas();
             refresh();
         });
@@ -66,9 +86,21 @@ public class LotesPanel extends JPanel {
         });
 
         btns.add(btnBaixa);
+        btns.add(btnDescartar);
         btns.add(btnNovo);
         p.add(btns, BorderLayout.EAST);
         return p;
+    }
+
+    /**
+     * Retorna o LoteEstoque correspondente à linha selecionada na tabela,
+     * convertendo corretamente o índice da view para o índice do modelo.
+     */
+    private LoteEstoque getLoteSelecionado() {
+        int viewRow = table.getSelectedRow();
+        if (viewRow < 0) return null;
+        int modelRow = table.convertRowIndexToModel(viewRow);
+        return EstoqueStore.get().getLotes().get(modelRow);
     }
 
     private JScrollPane buildTable() {
@@ -79,7 +111,7 @@ public class LotesPanel extends JPanel {
 
         table = new JTable(model);
         DashboardPanel.styleTable(table);
-        table.getColumnModel().getColumn(0).setPreferredWidth(45);
+        table.getColumnModel().getColumn(0).setPreferredWidth(100);
         table.getColumnModel().getColumn(1).setPreferredWidth(200);
         table.getColumnModel().getColumn(2).setPreferredWidth(110);
         table.getColumnModel().getColumn(3).setPreferredWidth(80);
@@ -87,19 +119,25 @@ public class LotesPanel extends JPanel {
         table.getColumnModel().getColumn(5).setPreferredWidth(110);
         table.getColumnModel().getColumn(6).setPreferredWidth(150);
 
+        // Permite ordenação clicando no cabeçalho
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+
         // coloriza linha inteira com base no status da última coluna
         TableCellRenderer colorRenderer = new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(
                     JTable t, Object v, boolean sel, boolean focus, int row, int col) {
                 Component c = super.getTableCellRendererComponent(t, v, sel, focus, row, col);
                 if (!sel) {
-                    String st = (String) model.getValueAt(row, 6);
+                    int modelRow = t.convertRowIndexToModel(row);
+                    String st = (String) model.getValueAt(modelRow, 6);
+                    c.setBackground(Tema.FUNDO);
                     if (st != null && st.contains("Vencido"))
-                        c.setForeground(new Color(255, 80, 80));
+                        c.setForeground(Tema.CRITICO_TXT);
                     else if (st != null && st.contains("Prox"))
-                        c.setForeground(new Color(255, 175, 0));
+                        c.setForeground(Tema.ALERTA_TXT);
                     else
-                        c.setForeground(new Color(60, 210, 110));
+                        c.setForeground(Tema.PRIMARIA_TXT);
                 }
                 return c;
             }
@@ -109,16 +147,17 @@ public class LotesPanel extends JPanel {
 
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.getViewport().setBackground(Tema.FUNDO);
         return sp;
     }
 
     private JPanel buildLegend() {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 4));
         p.setOpaque(false);
-        legend(p, "OK",                           new Color( 60, 210, 110));
-        legend(p, "Proximo ao Vencimento (<=5 d)", new Color(255, 175,   0));
-        legend(p, "Vencido",                       new Color(255,  80,  80));
-        legend(p, "Nao Perecivel: sem vencimento", new Color( 60, 210, 110));
+        legend(p, "OK",                           Tema.PRIMARIA_TXT);
+        legend(p, "Próximo ao Vencimento (<=5 d)", Tema.ALERTA_TXT);
+        legend(p, "Vencido",                       Tema.CRITICO_TXT);
+        legend(p, "Não Perecível: sem vencimento", Tema.PRIMARIA_TXT);
         return p;
     }
 
@@ -134,6 +173,20 @@ public class LotesPanel extends JPanel {
         model.setRowCount(0);
         for (LoteEstoque lote : EstoqueStore.get().getLotes()) {
             Produto prod = lote.getProduto();
+
+            if (prod == null) {
+                model.addRow(new Object[]{
+                    lote.getNumeroLote(),
+                    "(produto removido)",
+                    "—",
+                    lote.getQuantidade(),
+                    "—",
+                    lote.getDataEntrada().format(FMT),
+                    "—"
+                });
+                continue;
+            }
+
             String tipo, statusCol;
 
             if (prod instanceof ProdutoPerecivel) {
@@ -153,7 +206,7 @@ public class LotesPanel extends JPanel {
 
             model.addRow(new Object[]{
                 lote.getNumeroLote(),
-                prod.getNome(),
+                prod.getNome().toUpperCase(),
                 tipo,
                 lote.getQuantidade(),
                 prod.getEstoqueMinimo(),

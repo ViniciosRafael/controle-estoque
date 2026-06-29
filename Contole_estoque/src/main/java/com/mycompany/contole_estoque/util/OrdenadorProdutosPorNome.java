@@ -30,6 +30,7 @@ public class OrdenadorProdutosPorNome {
      * Resultado de uma ordenação com medição de tempo: contém a lista já
      * ordenada, o tempo que a ordenação levou para ser executada, e quantas
      * comparações e trocas o algoritmo realizou.
+     * @param <T>
      */
     public static class ResultadoOrdenacaoPorNome<T extends Produto> {
         private final List<T> produtosOrdenados;
@@ -47,16 +48,20 @@ public class OrdenadorProdutosPorNome {
 
         public List<T> getProdutosOrdenados() { return produtosOrdenados; }
 
-        /** Tempo de execução da ordenação, em segundos. */
+        /** Tempo de execução da ordenação, em segundos.
+         * @return  */
         public double getTempoSegundos() { return tempoSegundos; }
 
-        /** Tempo de execução da ordenação, em milissegundos (mais fácil de exibir na tela). */
+        /** Tempo de execução da ordenação, em milissegundos (mais fácil de exibir na tela).
+         * @return  */
         public double getTempoMilissegundos() { return tempoSegundos * 1000.0; }
 
-        /** Quantidade de comparações entre nomes realizadas durante a ordenação. */
+        /** Quantidade de comparações entre nomes realizadas durante a ordenação.
+         * @return  */
         public long getComparacoes() { return comparacoes; }
 
-        /** Quantidade de trocas (elemento da direita escolhido antes do da esquerda) realizadas. */
+        /** Quantidade de trocas (elemento da direita escolhido antes do da esquerda) realizadas.
+         * @return  */
         public long getTrocas() { return trocas; }
     }
 
@@ -75,6 +80,9 @@ public class OrdenadorProdutosPorNome {
      * nome (ordem A-Z, sem diferenciar maiúsculas/minúsculas). A lista
      * recebida como parâmetro não é modificada; o ID de cada Produto
      * permanece exatamente o mesmo que tinha antes da ordenação.
+     * @param <T>
+     * @param produtos
+     * @return 
      */
     public static <T extends Produto> List<T> ordenarPorNome(List<T> produtos) {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original
@@ -90,6 +98,9 @@ public class OrdenadorProdutosPorNome {
      * Útil para acompanhar o desempenho do algoritmo conforme a quantidade
      * de produtos cadastrados cresce (igual à medição de tempo feita no
      * benchmark de algoritmos de ordenação do projeto de catálogo de filmes).
+     * @param <T>
+     * @param produtos
+     * @return 
      */
     public static <T extends Produto> ResultadoOrdenacaoPorNome<T> ordenarPorNomeComTempo(List<T> produtos) {
         List<T> ordenados = new ArrayList<>(produtos); // cópia: preserva a lista original

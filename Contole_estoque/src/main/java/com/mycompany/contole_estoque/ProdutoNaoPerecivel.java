@@ -18,7 +18,11 @@ public class ProdutoNaoPerecivel extends Produto {
         this.estoqueMinimo = estoqueMinimo;
     }
 
-    /** Construtor legado (sem estoque mínimo) — mantido para compatibilidade. */
+    /** Construtor legado (sem estoque mínimo) — mantido para compatibilidade.
+     * @param id
+     * @param nome
+     * @param categoria
+     * @param precoUnitario */
     public ProdutoNaoPerecivel(int id, String nome, String categoria, double precoUnitario) {
         this(id, nome, categoria, precoUnitario, 0);
     }
@@ -40,6 +44,7 @@ public class ProdutoNaoPerecivel extends Produto {
     public double getPrecoUnitario()                    { return precoUnitario; }
     public void   setPrecoUnitario(double precoUnitario){ this.precoUnitario = precoUnitario; }
 
+    @Override
     public int  getEstoqueMinimo()               { return estoqueMinimo; }
     public void setEstoqueMinimo(int estoqueMinimo){ this.estoqueMinimo = estoqueMinimo; }
 }

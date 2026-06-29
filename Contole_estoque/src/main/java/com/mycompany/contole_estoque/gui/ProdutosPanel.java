@@ -40,7 +40,7 @@ public class ProdutosPanel extends JPanel {
     private static final String TITULO_ALFABETICA = "  Ordem Alfabética  ";
 
     public ProdutosPanel() {
-        setBackground(Color.WHITE);
+        setBackground(Tema.FUNDO);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
         add(buildHeader(), BorderLayout.NORTH);
@@ -55,7 +55,7 @@ public class ProdutosPanel extends JPanel {
 
         JLabel title = new JLabel("Produtos");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(new Color(20, 22, 35));
+        title.setForeground(Tema.TEXTO_TITULO);
         p.add(title, BorderLayout.WEST);
 
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -237,6 +237,7 @@ public class ProdutosPanel extends JPanel {
 
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.getViewport().setBackground(Tema.FUNDO);
         p.add(sp, BorderLayout.CENTER);
         return p;
     }
@@ -253,7 +254,7 @@ public class ProdutosPanel extends JPanel {
         perecModel.setRowCount(0);
         for (ProdutoPerecivel p : EstoqueStore.get().getPerec()) {
             perecModel.addRow(new Object[] {
-                    p.getId(), p.getNome(), p.getCategoria(),
+                    p.getId(), p.getNome().toUpperCase(), p.getCategoria(),
                     String.format("R$ %.2f", p.getPrecoUnitario()),
                     p.getEstoqueMinimo()
             });
@@ -265,7 +266,7 @@ public class ProdutosPanel extends JPanel {
         naoModel.setRowCount(0);
         for (ProdutoNaoPerecivel p : EstoqueStore.get().getNaoPerec()) {
             naoModel.addRow(new Object[]{
-                p.getId(), p.getNome(), p.getCategoria(),
+                p.getId(), p.getNome().toUpperCase(), p.getCategoria(),
                 String.format("R$ %.2f", p.getPrecoUnitario()),
                 p.getEstoqueMinimo()
             });
@@ -290,7 +291,7 @@ public class ProdutosPanel extends JPanel {
         for (Produto p : resultado.getProdutosOrdenados()) {
             String tipo = (p instanceof ProdutoPerecivel) ? "Perecível" : "Não Perecível";
             alfabeticaModel.addRow(new Object[]{
-                    p.getId(), p.getNome(), p.getCategoria(), tipo
+                    p.getId(), p.getNome().toUpperCase(), p.getCategoria(), tipo
             });
         }
         aplicarFiltro(alfabeticaTable, txtBuscaAlfabetica, 1);
@@ -384,9 +385,23 @@ public class ProdutosPanel extends JPanel {
     }
 
     private JTable buildTable(DefaultTableModel model) {
-        JTable t = new JTable(model);
-        DashboardPanel.styleTable(t);
-        return t;
+        JTable table = new JTable(model);
+        DashboardPanel.styleTable(table);
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override public Component getTableCellRendererComponent(
+                    JTable t, Object v, boolean sel, boolean focus, int row, int col) {
+                Component c = super.getTableCellRendererComponent(t, v, sel, focus, row, col);
+                if (!sel) {
+                    c.setBackground(Tema.FUNDO);
+                    c.setForeground(Tema.TEXTO_TITULO);
+                } else {
+                    c.setBackground(new Color(0, 120, 210));
+                    c.setForeground(Color.WHITE);
+                }
+                return c;
+            }
+        });
+        return table;
     }
     /** Colorizes the status column. */
 

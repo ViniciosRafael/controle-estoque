@@ -33,7 +33,8 @@ public class LoteEstoque {
         this.dataValidade = dataValidade;
     }
 
-    /** true somente se o produto for perecível e o lote já estiver vencido. */
+    /** true somente se o produto for perecível e o lote já estiver vencido.
+     * @return  */
     public boolean isVencido() {
         if (dataValidade == null) return false;
         return LocalDate.now().isAfter(dataValidade);
@@ -42,14 +43,24 @@ public class LoteEstoque {
     /**
      * Dias restantes até o vencimento deste lote.
      * Retorna Integer.MAX_VALUE para lotes sem data de validade (não perecíveis).
+     * @return 
      */
     public int diasParaVencer() {
         if (dataValidade == null) return Integer.MAX_VALUE;
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), dataValidade);
     }
 
-    /** Reduz a quantidade do lote em n unidades. */
+    /** Reduz a quantidade do lote em n unidades.
+     * Quantidades inválidas (zero, negativas, ou maiores que o disponível)
+     * são rejeitadas e não alteram o estoque — sem essa checagem, chamar
+     * darBaixa() com um número negativo na verdade aumentaria a quantidade
+     * (ex.: 100 - (-50) = 150), em vez de reduzir.
+     * @param qtd */
     public void darBaixa(int qtd) {
+        if (qtd <= 0) {
+            System.out.println("Erro: quantidade para baixa deve ser maior que zero.");
+            return;
+        }
         if (qtd <= this.quantidade) {
             this.quantidade -= qtd;
             System.out.println("Baixa de " + qtd + " itens. Quantidade atual: " + this.quantidade);

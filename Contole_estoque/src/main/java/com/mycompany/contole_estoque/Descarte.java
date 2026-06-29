@@ -30,17 +30,20 @@ public class Descarte {
     }
 
     public double calcularPrejuizo() {
-        double prejuizoUnitario = this.lote.getProduto().calcularPrejuizo();
+        Produto produto = this.lote.getProduto();
+        if (produto == null) return 0.0; // lote órfão: sem produto não há como calcular o prejuízo unitário
+        double prejuizoUnitario = produto.calcularPrejuizo();
         return prejuizoUnitario * this.quantidadeDescartada;
     }
 
 
     public void registrar() {
         this.lote.darBaixa(this.quantidadeDescartada);
-        
+
+        Produto produto = this.lote.getProduto();
         System.out.println("REGISTO DE DESCARTE");
         System.out.println("Motivo: " + this.motivo);
-        System.out.println("Produto: " + this.lote.getProduto().getNome());
+        System.out.println("Produto: " + (produto != null ? produto.getNome() : "(produto removido)"));
         System.out.println("Quantidade: " + this.quantidadeDescartada);
         System.out.println("Prejuízo Total: " + this.calcularPrejuizo());
     }
