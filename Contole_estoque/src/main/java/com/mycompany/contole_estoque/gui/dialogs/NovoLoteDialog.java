@@ -294,7 +294,7 @@ public class NovoLoteDialog extends JDialog {
             EstoqueStore.get().getLotes().add(novoLote);
 
             EstoqueStore.get().getMovimentacoes().add(new Movimentacao(
-                EstoqueStore.get().nextId(), Movimentacao.Tipo.INCLUSAO,
+                EstoqueStore.get().nextId(), TipoMovimentacao.INCLUSAO,
                 novoLote, qtd, LocalDate.now(), "Entrada de estoque"
             ));
 

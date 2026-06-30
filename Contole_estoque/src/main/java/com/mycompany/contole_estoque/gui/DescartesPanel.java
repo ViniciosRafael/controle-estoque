@@ -139,7 +139,7 @@ public class DescartesPanel extends JPanel {
 
             // Calcula prejuízo apenas para descartes
             String prejStr = "—";
-            if (mov.getTipo() == Movimentacao.Tipo.DESCARTE) {
+            if (mov.getTipo() == TipoMovimentacao.DESCARTE) {
                 // Busca o descarte correspondente para calcular o prejuízo real
                 double prej = EstoqueStore.get().getDescartes().stream()
                         .filter(d -> d.getLote() != null && mov.getLote() != null

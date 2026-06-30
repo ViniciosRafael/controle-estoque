@@ -144,7 +144,7 @@ public class NovoDescarteDialog extends JDialog {
 
             // Registra no histórico unificado de movimentações
             int movId = EstoqueStore.get().nextId();
-            Movimentacao mov = new Movimentacao(movId, Movimentacao.Tipo.DESCARTE,
+            Movimentacao mov = new Movimentacao(movId, TipoMovimentacao.DESCARTE,
                     lote, qtd, LocalDate.now(), motivo);
             EstoqueStore.get().getMovimentacoes().add(mov);
 

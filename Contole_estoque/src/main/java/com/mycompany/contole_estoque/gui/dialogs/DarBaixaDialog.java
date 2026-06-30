@@ -2,6 +2,7 @@ package com.mycompany.contole_estoque.gui.dialogs;
 
 import com.mycompany.contole_estoque.LoteEstoque;
 import com.mycompany.contole_estoque.Movimentacao;
+import com.mycompany.contole_estoque.TipoMovimentacao;
 import com.mycompany.contole_estoque.store.EstoqueStore;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -108,7 +109,7 @@ public class DarBaixaDialog extends JDialog {
             String obs = txtObservacao.getText().trim();
             if (obs.isEmpty()) obs = "Baixa manual";
             int movId = EstoqueStore.get().nextId();
-            Movimentacao mov = new Movimentacao(movId, Movimentacao.Tipo.BAIXA,
+            Movimentacao mov = new Movimentacao(movId, TipoMovimentacao.BAIXA,
                     lote, qtd, LocalDate.now(), obs);
             EstoqueStore.get().getMovimentacoes().add(mov);
 
