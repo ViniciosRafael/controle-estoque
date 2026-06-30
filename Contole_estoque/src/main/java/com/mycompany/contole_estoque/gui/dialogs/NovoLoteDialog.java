@@ -6,21 +6,26 @@ import com.mycompany.contole_estoque.store.EstoqueStore;
 import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Esta janela é um "Diálogo" que aparece para o usuário cadastrar uma nova entrada de estoque (Lote).
+ * Agora com busca inteligente de produtos.
  */
 public class NovoLoteDialog extends JDialog {
 
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    // Cores e estilos baseados no tema claro do sistema
     private static final Color BG_WHITE   = Tema.FUNDO;
     private static final Color BG_HEADER  = Tema.HEADER_BG;
     private static final Color BG_FIELD   = Tema.CAMPO_BG;
@@ -29,13 +34,14 @@ public class NovoLoteDialog extends JDialog {
     private static final Color TEXT_DIM   = Tema.TEXTO_SUB;
     private static final Color TEXT_MAIN  = Tema.TEXTO_TITULO;
 
-    private JComboBox<Produto> cbProduto; // Lista de seleção de produtos
-    private JTextField         txtLote;    // Campo para digitar o número do lote
-    private JTextField         txtQuantidade; // Campo para a quantidade
-    private JTextField         txtValidade;   // Campo para a data de validade
-    private JPanel             pnlValidade;   // Painel que esconde/mostra a validade
+    private JComboBox<Produto> cbProduto;
+    private JTextField         txtLote;
+    private JTextField         txtQuantidade;
+    private JTextField         txtValidade;
+    private JPanel             pnlValidade;
 
     private final List<Produto> todosProdutos = new ArrayList<>();
+    private boolean isFiltering = false;
 
     public NovoLoteDialog(JFrame owner) {
         super(owner, "Nova Entrada de Estoque", true);
@@ -45,7 +51,6 @@ public class NovoLoteDialog extends JDialog {
         buildUI();
     }
 
-    // Monta a interface visual da janelinha
     private void buildUI() {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(BG_WHITE);
@@ -56,13 +61,12 @@ public class NovoLoteDialog extends JDialog {
         root.add(buildFooter(), BorderLayout.SOUTH);
     }
 
-    // Cria o topo da janelinha com ícone e título
     private JPanel buildHeader() {
         JPanel h = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 14));
         h.setBackground(BG_HEADER);
         h.setBorder(new MatteBorder(0, 0, 1, 0, BORDER_CLR));
 
-        JLabel icon  = new JLabel("\uD83D\uDCE5"); // Ícone de caixa entrando
+        JLabel icon  = new JLabel("\uD83D\uDCE5");
         icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
 
         JLabel title = new JLabel("Registrar Entrada de Estoque");
@@ -74,28 +78,58 @@ public class NovoLoteDialog extends JDialog {
         return h;
     }
 
-    // Cria o corpo do formulário com os campos para preencher
     private JPanel buildBody() {
         JPanel body = new JPanel();
         body.setBackground(BG_WHITE);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(new EmptyBorder(18, 26, 10, 26));
 
-        // Pega todos os produtos cadastrados e organiza em ordem alfabética
         todosProdutos.addAll(EstoqueStore.get().getPerec());
         todosProdutos.addAll(EstoqueStore.get().getNaoPerec());
         todosProdutos.sort((p1, p2) -> p1.getNome().compareToIgnoreCase(p2.getNome()));
 
         cbProduto = new JComboBox<>();
+        cbProduto.setEditable(true); // Permite digitar para buscar
         cbProduto.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cbProduto.setBackground(BG_FIELD);
         cbProduto.setForeground(TEXT_MAIN);
         cbProduto.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         cbProduto.setAlignmentX(LEFT_ALIGNMENT);
 
-        for (Produto p : todosProdutos) cbProduto.addItem(p);
+        // Configura o campo de texto do ComboBox
+        JTextField editor = (JTextField) cbProduto.getEditor().getEditorComponent();
+        editor.putClientProperty("JTextField.placeholderText", "Digite o nome do produto...");
+        
+        // Adiciona os produtos inicialmente
+        refreshCombo(todosProdutos);
+        cbProduto.setSelectedItem(null); // Inicia vazio para não mostrar o toString do primeiro item
+        editor.setText("");
 
-        // Define como cada produto aparece na lista (em MAIÚSCULO e com ícone)
+        // Lógica de busca em tempo real
+        editor.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e)  { filtrar(); }
+            @Override public void removeUpdate(DocumentEvent e)  { filtrar(); }
+            @Override public void changedUpdate(DocumentEvent e) { filtrar(); }
+            
+            private void filtrar() {
+                if (isFiltering) return;
+                SwingUtilities.invokeLater(() -> {
+                    isFiltering = true;
+                    String busca = editor.getText().toLowerCase();
+                    List<Produto> filtrados = todosProdutos.stream()
+                            .filter(p -> p.getNome().toLowerCase().contains(busca))
+                            .collect(Collectors.toList());
+                    
+                    refreshCombo(filtrados);
+                    editor.setText(busca); // Mantém o texto digitado
+                    if (!filtrados.isEmpty() && !busca.isEmpty()) {
+                        cbProduto.setPopupVisible(true);
+                    }
+                    isFiltering = false;
+                });
+            }
+        });
+
         cbProduto.setRenderer(new DefaultListCellRenderer() {
             @Override public Component getListCellRendererComponent(
                     JList<?> l, Object v, int i, boolean sel, boolean focus) {
@@ -108,8 +142,9 @@ public class NovoLoteDialog extends JDialog {
             }
         });
 
-        // Quando o usuário escolhe um produto, verifica se precisa mostrar o campo de validade
-        cbProduto.addActionListener(e -> atualizarCampoValidade());
+        cbProduto.addActionListener(e -> {
+            if (!isFiltering) atualizarCampoValidade();
+        });
 
         txtLote = field();
         txtQuantidade = field();
@@ -122,22 +157,28 @@ public class NovoLoteDialog extends JDialog {
         pnlValidade.setAlignmentX(LEFT_ALIGNMENT);
         addRow(pnlValidade, "Data de Validade (dd/MM/aaaa)", txtValidade);
 
-        addRow(body, "Produto",         cbProduto);
+        addRow(body, "Pesquisar Produto", cbProduto);
         addRow(body, "Número do Lote",  txtLote);
         addRow(body, "Quantidade",      txtQuantidade);
         body.add(pnlValidade);
 
-        atualizarCampoValidade(); // Decide se começa com validade visível ou não
+        atualizarCampoValidade();
         return body;
     }
 
-    // Só mostra a data de validade se o produto for do tipo "Perecível"
-    private void atualizarCampoValidade() {
-        boolean isPerec = cbProduto.getSelectedItem() instanceof ProdutoPerecivel;
-        pnlValidade.setVisible(isPerec);
+    private void refreshCombo(List<Produto> lista) {
+        cbProduto.removeAllItems();
+        for (Produto p : lista) cbProduto.addItem(p);
     }
 
-    // Cria a parte de baixo com os botões Salvar e Cancelar
+    private void atualizarCampoValidade() {
+        Object item = cbProduto.getSelectedItem();
+        boolean isPerec = item instanceof ProdutoPerecivel;
+        pnlValidade.setVisible(isPerec);
+        revalidate();
+        repaint();
+    }
+
     private JPanel buildFooter() {
         JPanel foot = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         foot.setBackground(BG_HEADER);
@@ -159,7 +200,6 @@ public class NovoLoteDialog extends JDialog {
         return foot;
     }
 
-    // Helper para adicionar uma linha com texto e um campo de preencher
     private void addRow(JPanel panel, String label, JComponent field) {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -171,7 +211,6 @@ public class NovoLoteDialog extends JDialog {
         panel.add(field);
     }
 
-    // Cria um campo de texto estilizado
     private JTextField field() {
         JTextField tf = new JTextField();
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -181,11 +220,14 @@ public class NovoLoteDialog extends JDialog {
         return tf;
     }
 
-    // Lógica para salvar a entrada no estoque
     private void salvar() {
         try {
-            Produto prod = (Produto) cbProduto.getSelectedItem();
-            if (prod == null) { err("Selecione um produto."); return; }
+            Object selected = cbProduto.getSelectedItem();
+            if (!(selected instanceof Produto)) { 
+                err("Selecione um produto válido da lista."); 
+                return; 
+            }
+            Produto prod = (Produto) selected;
 
             String loteTxt = txtLote.getText().trim();
             if (loteTxt.isEmpty()) { err("Informe o número do lote."); return; }
@@ -200,19 +242,17 @@ public class NovoLoteDialog extends JDialog {
                 validade = LocalDate.parse(valTxt, DTF);
             }
 
-            // Cria o lote e salva na memória do sistema
             int id = EstoqueStore.get().nextId();
             LoteEstoque novoLote = new LoteEstoque(id, loteTxt, prod, qtd, LocalDate.now(), validade);
             EstoqueStore.get().getLotes().add(novoLote);
             
-            // Registra a ação no histórico de movimentações
             EstoqueStore.get().getMovimentacoes().add(new Movimentacao(
                 EstoqueStore.get().nextId(), Movimentacao.Tipo.INCLUSAO,
                 novoLote, qtd, LocalDate.now(), "Entrada de estoque"
             ));
 
-            EstoqueStore.get().gerarAlertas(); // Atualiza os avisos do dashboard
-            dispose(); // Fecha a janelinha
+            EstoqueStore.get().gerarAlertas();
+            dispose();
 
         } catch (NumberFormatException ex) {
             err("Quantidade inválida. Digite apenas números.");
