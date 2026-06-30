@@ -7,7 +7,6 @@ import com.mycompany.contole_estoque.gui.theme.Tema;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import static java.awt.Component.LEFT_ALIGNMENT;
 import java.util.ArrayList;
 import java.util.List;
 

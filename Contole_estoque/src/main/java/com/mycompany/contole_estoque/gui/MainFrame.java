@@ -3,7 +3,6 @@ package com.mycompany.contole_estoque.gui;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import static java.awt.Component.LEFT_ALIGNMENT;
 import java.awt.event.*;
 
 public class MainFrame extends JFrame {
