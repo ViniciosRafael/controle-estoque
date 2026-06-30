@@ -28,23 +28,13 @@ public abstract class Alerta {
     // Usado para classificar e filtrar alertas em painéis
     public abstract String getTipo();
 
-    // ════════════════════════════════════════════════════════════════════════════
-    // GETTERS - Métodos de acesso aos atributos (leitura)
-    // ════════════════════════════════════════════════════════════════════════════
-    
     /** @return O ID único deste alerta */
-    public int getAlertaId(){ return alertaId; }
-    
+    public int getAlertaId(){ return alertaId; } 
     /** @return A mensagem descritiva do alerta */
     public String getMensagem(){ return mensagem; }
-    
     /** @return A data de geração do alerta */
     public LocalDate getData(){ return data; }
 
-    // ════════════════════════════════════════════════════════════════════════════
-    // SETTERS - Métodos para modificar os atributos (escrita)
-    // ════════════════════════════════════════════════════════════════════════════
-    
     /** Modifica o ID do alerta */
     public void setAlertaId(int alertaId){ this.alertaId = alertaId; }
     

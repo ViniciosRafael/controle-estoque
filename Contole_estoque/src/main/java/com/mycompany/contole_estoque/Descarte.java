@@ -1,5 +1,4 @@
 package com.mycompany.contole_estoque;
-
 import java.time.LocalDate;
 
 public class Descarte {
@@ -28,16 +27,12 @@ public class Descarte {
         this.dataDescarte = dataDescarte;
         this.motivo = motivo;
     }
-
-    
     public double calcularPrejuizo() {
         Produto produto = this.lote.getProduto();
         if (produto == null) return 0.0; // Lote órfão: sem produto não há como calcular
         double prejuizoUnitario = produto.calcularPrejuizo(); // Preço unitário
         return prejuizoUnitario * this.quantidadeDescartada;  // Total
     }
-
-
     public void registrar() {
         // Aplica a baixa no lote
         this.lote.darBaixa(this.quantidadeDescartada);
@@ -50,10 +45,6 @@ public class Descarte {
         System.out.println("Quantidade: " + this.quantidadeDescartada);
         System.out.println("Prejuízo Total: " + this.calcularPrejuizo());
     }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // GETTERS E SETTERS
-    // ═══════════════════════════════════════════════════════════════════
 
     public int getDescarteId(){return descarteId;}
     public LoteEstoque getLote(){ return lote; }

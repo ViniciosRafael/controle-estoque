@@ -30,8 +30,6 @@ public class ProdutoNaoPerecivel extends Produto {
         this.estoqueMinimo = estoqueMinimo;
     }
 
-
-
     /**
      * Retorna o prejuízo, que neste caso é exatamente o custo unitário do produto.
      */
@@ -44,23 +42,15 @@ public class ProdutoNaoPerecivel extends Produto {
      */
     @Override
     public String getNome() { return super.getNome(); }
-
     /**
      * Registra este produto não perecível no sistema.
      * Exibe mensagem detalhada com todas as informações do produto.
      */
     @Override
     public void cadastrar() {
-        System.out.println("Produto não perecível '" + getNome()
-            + "' (categoria: " + getCategoria()
-            + ") cadastrado. Preço unitário: R$ " + precoUnitario
-            + " | Est. Mínimo: " + estoqueMinimo);
+        System.out.println("Produto não perecível '" + getNome() + "' (categoria: " + getCategoria()+ ") cadastrado. Preço unitário: R$ " + 
+        precoUnitario+ " | Est. Mínimo: " + estoqueMinimo);
     }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // GETTERS E SETTERS
-    // ═══════════════════════════════════════════════════════════════════
-
     /**
      * Retorna o preço unitário deste produto.
      * @return Preço de uma unidade em reais
