@@ -65,14 +65,10 @@ public class NovoProdutoDialog extends JDialog {
         h.setBackground(BG_HEADER);
         h.setBorder(new MatteBorder(0, 0, 1, 0, BORDER_CLR));
 
-        JLabel icon  = new JLabel("\uD83D\uDCE6");
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
-
         JLabel title = new JLabel("Cadastrar Produto");
         title.setFont(new Font("Segoe UI", Font.BOLD, 16));
         title.setForeground(TEXT_MAIN);
 
-        h.add(icon);
         h.add(title);
         return h;
     }

@@ -45,7 +45,7 @@ public class AlertasPanel extends JPanel {
         cbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cbFiltro.addActionListener(e -> refresh());
 
-        JButton btnGerar = ProdutosPanel.actionButton("🔄  Gerar Alertas", new Color(0, 120, 210));
+        JButton btnGerar = ProdutosPanel.actionButton("Gerar Alertas", new Color(0, 120, 210));
         btnGerar.addActionListener(e -> {
             EstoqueStore.get().gerarAlertas();
             refresh();
