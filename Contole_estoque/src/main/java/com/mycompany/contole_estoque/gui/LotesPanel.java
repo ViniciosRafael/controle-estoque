@@ -170,6 +170,7 @@ public class LotesPanel extends JPanel {
 
     // ----------------------------------------------------------------- refresh
     public void refresh() {
+        EstoqueStore.get().limparLotesZerados();
         model.setRowCount(0);
         for (LoteEstoque lote : EstoqueStore.get().getLotes()) {
             Produto prod = lote.getProduto();

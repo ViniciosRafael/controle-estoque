@@ -184,6 +184,7 @@ public class DashboardPanel extends JPanel {
     // Atualiza todos os números e a tabela com os dados mais recentes da memória
     public void refresh() {
         EstoqueStore s = EstoqueStore.get();
+        s.limparLotesZerados();
         s.gerarAlertas(); // Manda o sistema recalcular os alertas
         lblProdutos.setText(String.valueOf(s.getPerec().size() + s.getNaoPerec().size()));
         lblLotes.setText(String.valueOf(s.getLotes().size()));

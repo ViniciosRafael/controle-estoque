@@ -1,12 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.contole_estoque;
 
 /**
- *
- * @author vinic
+ * Alerta de estoque mínimo atingido.
  */
 public class AlertaEstoqueMinimo extends Alerta {
     private int qtdAtual;
@@ -14,19 +9,26 @@ public class AlertaEstoqueMinimo extends Alerta {
     public AlertaEstoqueMinimo() { super(); }
 
     public AlertaEstoqueMinimo(int alertaId, LoteEstoque lote) {
-        super(alertaId,
-              "O lote #" + lote.getIdLote()
-              + " do produto '" + lote.getProduto().getNome()
-              + "' está abaixo do estoque mínimo."
-              + " Atual: " + lote.getQuantidade()
-              + " | Mínimo: " + lote.getProduto().getEstoqueMinimo());
-        this.qtdAtual = lote.getQuantidade();
+        this(alertaId, lote, lote.getQuantidade());
+    }
+
+    public AlertaEstoqueMinimo(int alertaId, LoteEstoque lote, int qtdTotal) {
+        super(alertaId, buildMensagem(lote, qtdTotal));
+        this.qtdAtual = qtdTotal;
+    }
+
+    private static String buildMensagem(LoteEstoque lote, int qtdTotal) {
+        String idLote = lote.getNumeroLote() != null ? lote.getNumeroLote() : String.valueOf(lote.getIdLote());
+        return "ESTOQUE BAIXO — O produto '" + lote.getProduto().getNome() 
+                + "' (Lote: " + idLote + ") atingiu o nível crítico."
+                + " Total em estoque: " + qtdTotal 
+                + " | Mínimo: " + lote.getProduto().getEstoqueMinimo();
     }
 
     @Override
     public void emitir() {
         System.out.println("[" + getTipo() + "] " + getMensagem());
-        System.out.println("  Quantidade atual: " + qtdAtual);
+        System.out.println("  Quantidade total: " + qtdAtual);
         System.out.println("  Data do alerta:   " + getData());
     }
 

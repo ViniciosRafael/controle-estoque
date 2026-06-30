@@ -2,7 +2,11 @@ package com.mycompany.contole_estoque.store;
 
 import com.mycompany.contole_estoque.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Esta classe é o "cérebro" e a "memória" do sistema.
@@ -35,32 +39,57 @@ public class EstoqueStore {
     public int nextId() { return nextId++; }
 
     /**
+     * Remove todos os lotes que possuem quantidade zero da lista ativa de estoque.
+     */
+    public void limparLotesZerados() {
+        lotes.removeIf(lote -> lote.getQuantidade() <= 0);
+    }
+
+    /**
      * Este método varre todo o estoque e cria avisos automáticos se:
      * 1. O produto estiver vencido ou quase vencendo (menos de 5 dias).
-     * 2. A quantidade do lote for menor que o estoque mínimo definido para o produto.
+     * 2. O TOTAL de estoque do produto (soma de todos os lotes) for menor que o mínimo definido.
+     * Os alertas são gerados de forma MISTURADA conforme os lotes são processados.
      */
     public void gerarAlertas() {
+        // Antes de gerar alertas, removemos lotes que não existem mais fisicamente
+        limparLotesZerados();
+        
         alertas.clear(); // Limpa os avisos antigos antes de criar novos
-        int id = 1;
+        int idAlerta = 1;
+        
+        // Passo 1: Calcular o TOTAL de estoque por produto primeiro (para o alerta de estoque mínimo)
+        Map<Integer, Integer> totalPorProduto = new HashMap<>();
         for (LoteEstoque lote : lotes) {
             Produto prod = lote.getProduto();
-            if (prod == null) continue;
+            if (prod != null && lote.getQuantidade() > 0) {
+                int prodId = prod.getId();
+                totalPorProduto.put(prodId, totalPorProduto.getOrDefault(prodId, 0) + lote.getQuantidade());
+            }
+        }
 
-            // 1. Alerta de vencimento:
-            // Cria aviso se o produto tiver validade e estiver vencido OU faltar 5 dias ou menos.
+        // Passo 2: Iterar pelos lotes e gerar os alertas de forma MISTURADA
+        Set<Integer> produtosComAlertaEstoque = new HashSet<>();
+        
+        for (LoteEstoque lote : lotes) {
+            Produto prod = lote.getProduto();
+            if (prod == null || lote.getQuantidade() <= 0) continue;
+
+            // --- Tenta gerar Alerta de VENCIMENTO para este lote ---
             if (lote.getDataValidade() != null) {
                 int dias = lote.diasParaVencer();
                 if (lote.isVencido() || dias <= 5) {
-                    alertas.add(new AlertaVencimento(id++, lote));
+                    alertas.add(new AlertaVencimento(idAlerta++, lote));
                 }
             }
 
-            // 2. Alerta de estoque mínimo:
-            // Cria aviso se ainda houver produto no lote, mas a quantidade for menor que o mínimo.
-            if (lote.getQuantidade() > 0
-                    && prod.getEstoqueMinimo() > 0
-                    && lote.getQuantidade() < prod.getEstoqueMinimo()) {
-                alertas.add(new AlertaEstoqueMinimo(id++, lote));
+            // --- Tenta gerar Alerta de ESTOQUE MÍNIMO para o produto deste lote ---
+            if (!produtosComAlertaEstoque.contains(prod.getId())) {
+                int totalEstoque = totalPorProduto.getOrDefault(prod.getId(), 0);
+                if (prod.getEstoqueMinimo() > 0 && totalEstoque > 0 && totalEstoque < prod.getEstoqueMinimo()) {
+                    alertas.add(new AlertaEstoqueMinimo(idAlerta++, lote, totalEstoque));
+                    produtosComAlertaEstoque.add(prod.getId());
+                }
             }
         }
     }
