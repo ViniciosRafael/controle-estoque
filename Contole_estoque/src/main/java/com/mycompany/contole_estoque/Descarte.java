@@ -2,34 +2,6 @@ package com.mycompany.contole_estoque;
 
 import java.time.LocalDate;
 
-/**
- * ╔════════════════════════════════════════════════════════════════════════════╗
- * ║                       CLASSE: REGISTRO DE DESCARTE                         ║
- * ╚════════════════════════════════════════════════════════════════════════════╝
- *
- * Registra um evento de descarte (perda) de produtos do estoque.
- * Um descarte ocorre quando produtos são removidos do estoque e perdidos/descartados.
- *
- * Motivos comuns de descarte:
- *  • Prazo de validade expirado (principal para perecíveis)
- *  • Avaria física ou dano
- *  • Contaminacção
- *  • Roubo ou extravio
- *  • Rejeicção de qualidade
- *
- * Atributos:
- *  • descarteId               : ID único deste registro de descarte
- *  • lote                      : Referência para o LoteEstoque que foi descartado
- *  • quantidadeDescartada     : Quantidade de unidades descartadas
- *  • dataDescarte             : Data em que o descarte foi registrado
- *  • motivo                    : Razão do descarte (texto descritivo)
- *
- * Responsabilidades:
- *  • Registrar e documentar perdas de produtos
- *  • Calcular o prejuízo financeiro causado pelo descarte
- *  • Atualizar o estoque (dar baixa) quando descarte é realizado
- *  • Manter auditoria de todos os descartes
- */
 public class Descarte {
     private int descarteId;                    // ID único deste descarte
     private LoteEstoque lote;                  // Lote que foi descartado
@@ -60,10 +32,6 @@ public class Descarte {
         this.dataDescarte = dataDescarte;
         this.motivo = motivo;
     }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // CÁLCULO DE PREJUÍZO
-    // ═══════════════════════════════════════════════════════════════════
 
     /**
      * Calcula o prejuízo financeiro total causado por este descarte.
