@@ -9,6 +9,8 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * Painel de Estoque — lista entradas de estoque de TODOS os produtos
@@ -23,15 +25,24 @@ public class LotesPanel extends JPanel {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private DefaultTableModel model;
-    private JTable            table;
+    private DefaultTableModel        model;
+    private JTable                   table;
+    private JTextField               txtBusca;
+    private TableRowSorter<DefaultTableModel> sorter;
 
     public LotesPanel() {
         setBackground(Tema.FUNDO);
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(28, 28, 28, 28));
+
+        // Painel central: barra de busca + tabela
+        JPanel center = new JPanel(new BorderLayout(0, 8));
+        center.setOpaque(false);
+        center.add(buildSearchBar(), BorderLayout.NORTH);
+        center.add(buildTable(),     BorderLayout.CENTER);
+
         add(buildHeader(), BorderLayout.NORTH);
-        add(buildTable(),  BorderLayout.CENTER);
+        add(center,        BorderLayout.CENTER);
         add(buildLegend(), BorderLayout.SOUTH);
         refresh();
     }
@@ -103,6 +114,45 @@ public class LotesPanel extends JPanel {
         return EstoqueStore.get().getLotes().get(modelRow);
     }
 
+    /** Barra de busca em tempo real — filtra por lote, produto ou tipo. */
+    private JPanel buildSearchBar() {
+        JPanel bar = new JPanel(new BorderLayout(8, 0));
+        bar.setOpaque(false);
+
+        txtBusca = new JTextField();
+        txtBusca.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtBusca.putClientProperty("JTextField.placeholderText", "Pesquisar por produto, lote ou tipo...");
+        txtBusca.putClientProperty("JTextField.showClearButton", true);
+        txtBusca.setPreferredSize(new Dimension(300, 32));
+        txtBusca.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e)  { SwingUtilities.invokeLater(() -> aplicarFiltro()); }
+            @Override public void removeUpdate(DocumentEvent e)  { SwingUtilities.invokeLater(() -> aplicarFiltro()); }
+            @Override public void changedUpdate(DocumentEvent e) {}
+        });
+
+        bar.add(txtBusca, BorderLayout.WEST);
+        return bar;
+    }
+
+    /** Aplica o filtro de texto no sorter da tabela. */
+    private void aplicarFiltro() {
+        String termo = txtBusca.getText().trim().toLowerCase();
+        if (termo.isEmpty()) {
+            sorter.setRowFilter(null);
+            return;
+        }
+        sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+            @Override public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                // Colunas: 0=Lote, 1=Produto, 2=Tipo, 3=Qtd, 4=Est.Min, 5=Data, 6=Status
+                for (int col : new int[]{0, 1, 2, 6}) {
+                    Object v = entry.getValue(col);
+                    if (v != null && v.toString().toLowerCase().contains(termo)) return true;
+                }
+                return false;
+            }
+        });
+    }
+
     private JScrollPane buildTable() {
         String[] cols = {"Lote", "Produto", "Tipo", "Qtd Atual", "Est. Min.", "Data Entrada", "Validade / Status"};
         model = new DefaultTableModel(cols, 0) {
@@ -119,8 +169,8 @@ public class LotesPanel extends JPanel {
         table.getColumnModel().getColumn(5).setPreferredWidth(110);
         table.getColumnModel().getColumn(6).setPreferredWidth(150);
 
-        // Permite ordenação clicando no cabeçalho
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        // Permite ordenação clicando no cabeçalho e filtragem via barra de busca
+        sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
 
         // coloriza linha inteira com base no status da última coluna
