@@ -32,7 +32,7 @@ public class Descarte {
     public double calcularPrejuizo() {
         Produto produto = this.lote.getProduto();
         if (produto == null) return 0.0; // lote órfão: sem produto não há como calcular o prejuízo unitário
-        double prejuizoUnitario = produto.calcularPrejuizo();
+        double prejuizoUnitario = produto.calcularPrejuizo(); //implementado da classe abstrata produto
         return prejuizoUnitario * this.quantidadeDescartada;
     }
 

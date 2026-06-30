@@ -19,6 +19,8 @@ public class ExportadorExcel {
 
     /**
      * Método que gera o arquivo Excel no caminho escolhido pelo usuário.
+     * @param caminhoArquivo
+     * @throws java.io.IOException
      */
     public static void exportar(String caminhoArquivo) throws IOException {
         // Cria um novo arquivo de Excel em branco
