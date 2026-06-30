@@ -107,13 +107,6 @@ public class MainFrame extends JFrame {
 
         sidebar.add(Box.createVerticalGlue());
 
-        JLabel ver = new JLabel("  v1.4");
-        ver.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        ver.setForeground(new Color(180, 183, 195));
-        ver.setBorder(new EmptyBorder(8, 10, 12, 10));
-        ver.setAlignmentX(LEFT_ALIGNMENT);
-        sidebar.add(ver);
-
         return sidebar;
     }
 

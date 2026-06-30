@@ -130,12 +130,8 @@ public class DashboardPanel extends JPanel {
         cbFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cbFiltro.addActionListener(e -> refreshAlertas());
 
-        JButton btnGerar = ProdutosPanel.actionButton("Atualizar Alertas", Tema.PRIMARIA);
-        btnGerar.addActionListener(e -> { EstoqueStore.get().gerarAlertas(); refresh(); });
-
         ctrl.add(lblFiltro);
         ctrl.add(cbFiltro);
-        ctrl.add(btnGerar);
         header.add(ctrl, BorderLayout.EAST);
 
         section.add(header,            BorderLayout.NORTH);
