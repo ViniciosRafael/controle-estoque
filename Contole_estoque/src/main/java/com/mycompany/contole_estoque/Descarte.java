@@ -29,19 +29,7 @@ public class Descarte {
         this.motivo = motivo;
     }
 
-    /**
-     * Calcula o prejuízo financeiro total causado por este descarte.
-     * Fórmula: Prejuízo = (Preço Unitário do Produto) × (Quantidade Descartada)
-     *
-     * Exemplos:
-     *  • 50 unidades de Leite (R$ 3,50/un) vencido = R$ 175 de prejuízo
-     *  • 10 unidades de Detergente (R$ 5,00/un) danificado = R$ 50 de prejuízo
-     *
-     * Nota: Se o produto foi removido do sistema (lote órfão),
-     * retorna 0 pois não é possível calcular prejuízo sem referência de preço.
-     *
-     * @return Valor total do prejuízo em reais (R$)
-     */
+    
     public double calcularPrejuizo() {
         Produto produto = this.lote.getProduto();
         if (produto == null) return 0.0; // Lote órfão: sem produto não há como calcular
@@ -49,19 +37,7 @@ public class Descarte {
         return prejuizoUnitario * this.quantidadeDescartada;  // Total
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // REGISTRO E AUDITORIA
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Registra este descarte no sistema.
-     * Ao registrar:
-     *  1. Aplica a baixa de quantidade no lote
-     *  2. Exibe um relatório detalhado do descarte
-     *  3. Mostra o prejuízo calculado
-     *
-     * Este método é chamado quando o descarte é confirmado pelo usuário.
-     */
     public void registrar() {
         // Aplica a baixa no lote
         this.lote.darBaixa(this.quantidadeDescartada);

@@ -3,33 +3,7 @@ package com.mycompany.contole_estoque;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-/**
- * ╔════════════════════════════════════════════════════════════════════════════╗
- * ║                     CLASSE: LOTE DE ESTOQUE                               ║
- * ╚════════════════════════════════════════════════════════════════════════════╝
- *
- * Representa uma entrada/lote de um produto no estoque.
- * Cada lote é uma quantidade específica de um produto que entrou no estoque
- * em uma determinada data, podendo ter uma data de validade (se perecível).
- *
- * Exemplos práticos:
- *  • Lote 1: 50 unidades de Leite Integral, entrada 01/01/2024, vence 15/02/2024
- *  • Lote 2: 100 unidades de Papel Higiênico, entrada 05/01/2024, sem data de vencimento
- *
- * Atributos:
- *  • idLote       : ID único deste lote no sistema
- *  • numeroLote   : Código do lote informado pelo usuário/fornecedor (ex: "LOTE001")
- *  • produto      : Referência para o Produto associado
- *  • quantidade   : Quantidade atual disponível do lote
- *  • dataEntrada  : Data em que o lote entrou no estoque
- *  • dataValidade : Data de vencimento (NULL para não perecíveis)
- *
- * Responsabilidades:
- *  • Gerenciar a quantidade disponível (dar baixa quando produtos são retirados)
- *  • Detectar vencimento de produtos perecíveis
- *  • Calcular dias restantes até vencimento
- *  • Manter rastreabilidade através do número de lote
- */
+
 public class LoteEstoque {
 
     private int       idLote;        // ID único deste lote
@@ -51,8 +25,7 @@ public class LoteEstoque {
      * @param dataEntrada  : Data de entrada no estoque
      * @param dataValidade : Data de validade (NULL se não perecível)
      */
-    public LoteEstoque(int idLote, String numeroLote, Produto produto, int quantidade,
-                       LocalDate dataEntrada, LocalDate dataValidade) {
+    public LoteEstoque(int idLote, String numeroLote, Produto produto, int quantidade,LocalDate dataEntrada, LocalDate dataValidade) {
         this.idLote       = idLote;
         this.numeroLote   = numeroLote;
         this.produto      = produto;
@@ -61,9 +34,6 @@ public class LoteEstoque {
         this.dataValidade = dataValidade;
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // MÉTODOS DE VERIFICAÇÃO DE VALIDADE
-    // ═══════════════════════════════════════════════════════════════════
 
     /**
      * Verifica se este lote já está vencido.
@@ -76,43 +46,13 @@ public class LoteEstoque {
         return LocalDate.now().isAfter(dataValidade);
     }
 
-    /**
-     * Calcula quantos dias faltam até o vencimento deste lote.
-     * Para lotes sem data de validade (não perecíveis), retorna Integer.MAX_VALUE.
-     * Se já está vencido, retorna um número negativo.
-     *
-     * Exemplos:
-     *  • Lote vence em 5 dias  → retorna 5
-     *  • Lote já venceu há 3 dias → retorna -3
-     *  • Produto não perecível → retorna Integer.MAX_VALUE
-     *
-     * @return Número de dias até vencimento (ou negativo se vencido)
-     */
+    
     public int diasParaVencer() {
         if (dataValidade == null) return Integer.MAX_VALUE; // Sem prazo de validade
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), dataValidade);
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // MÉTODOS DE MANIPULAÇÃO DE QUANTIDADE
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Processa uma retirada (baixa) de quantidade deste lote.
-     * Este método é usado quando produtos são vendidos, descartados ou transferidos.
-     *
-     * VALIDAÇÕES:
-     *  ✓ Quantidade deve ser positiva (> 0)
-     *  ✓ Quantidade não pode exceder o disponível
-     *  ✓ Se validação falhar, a quantidade não é alterada e uma mensagem de erro é exibida
-     *
-     * IMPORTÂNCIA: As validações evitam erros graves como:
-     *  • Dar baixa com quantidade negativa (aumentaria o estoque!)
-     *  • Dar baixa com mais do que disponível (criaria quantidade negativa)
-     *  • Dar baixa com zero (operação inútil)
-     *
-     * @param qtd Quantidade a ser retirada
-     */
     public void darBaixa(int qtd) {
         // Validação 1: Quantidade deve ser positiva
         if (qtd <= 0) {
