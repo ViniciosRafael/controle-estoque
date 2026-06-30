@@ -9,10 +9,6 @@ public class Descarte {
     private LocalDate dataDescarte;            // Data do descarte
     private String motivo;                     // Motivo do descarte (ex: "Prazo de validade expirado")
 
-    // ═══════════════════════════════════════════════════════════════════
-    // CONSTRUTORES
-    // ═══════════════════════════════════════════════════════════════════
-
     /** Construtor vazio - usado para desserialização ou criação post-hoc */
     public Descarte() {}
 
