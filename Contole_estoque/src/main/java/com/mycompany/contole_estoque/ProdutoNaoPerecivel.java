@@ -1,11 +1,17 @@
 package com.mycompany.contole_estoque;
 
 
+/**
+ * Classe que representa um produto de estoque sem validade, como limpeza e utensílios.
+ */
 public class ProdutoNaoPerecivel extends Produto {
 
     private double precoUnitario;  // Preço de cada unidade
     private int    estoqueMinimo;  // Quantidade mínima desejada em estoque
 
+    /**
+     * Construtor padrão que inicializa a classe base.
+     */
     public ProdutoNaoPerecivel() { super(); }
 
     /**
@@ -26,6 +32,9 @@ public class ProdutoNaoPerecivel extends Produto {
 
 
 
+    /**
+     * Retorna o prejuízo, que neste caso é exatamente o custo unitário do produto.
+     */
     @Override
     public double calcularPrejuizo() { return precoUnitario; }
 

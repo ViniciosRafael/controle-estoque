@@ -4,8 +4,13 @@ import com.mycompany.contole_estoque.gui.MainFrame;
 import com.mycompany.contole_estoque.teste.GeradorDadosTeste;
 import javax.swing.*;
 
+/**
+ * Classe principal do sistema de controle de estoque.
+ * Ponto inicial da aplicação que configura a interface e inicia a janela principal.
+ */
 public class Contole_estoque {
 
+    // Define a quantidade de registros fictícios a serem gerados (0 desativa a geração de testes)
     private static final int QUANTIDADE_DADOS_TESTE = 500;
 
     /**

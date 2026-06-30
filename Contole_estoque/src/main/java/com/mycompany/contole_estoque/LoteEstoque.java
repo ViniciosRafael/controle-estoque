@@ -13,6 +13,9 @@ public class LoteEstoque {
     private LocalDate dataEntrada;   // Data de entrada no estoque
     private LocalDate dataValidade;  // Data de vencimento (NULL para não perecíveis)
 
+    /**
+     * Construtor padrão vazio para instanciação.
+     */
     public LoteEstoque() {}
 
     /**
@@ -47,12 +50,21 @@ public class LoteEstoque {
     }
 
     
+    /**
+     * Calcula a quantidade de dias restantes até o vencimento do lote.
+     * @return Número de dias para o vencimento, ou Integer.MAX_VALUE para não perecíveis.
+     */
     public int diasParaVencer() {
         if (dataValidade == null) return Integer.MAX_VALUE; // Sem prazo de validade
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), dataValidade);
     }
 
 
+    /**
+     * Deduz a quantidade informada do saldo atual do lote.
+     * Valida se a quantidade é positiva e se há saldo disponível suficiente antes de aplicar a baixa.
+     * @param qtd : Quantidade a ser dada baixa.
+     */
     public void darBaixa(int qtd) {
         // Validação 1: Quantidade deve ser positiva
         if (qtd <= 0) {
