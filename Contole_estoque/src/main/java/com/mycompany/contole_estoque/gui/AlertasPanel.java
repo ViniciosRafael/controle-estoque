@@ -1,12 +1,12 @@
 package com.mycompany.contole_estoque.gui; // Define o pacote desta classe
 
-import com.mycompany.contole_estoque.*; // Importa as classes do pacote principal
-import com.mycompany.contole_estoque.store.EstoqueStore; // Importa a classe EstoqueStore
-import javax.swing.*; // Importa os componentes do Swing
-import javax.swing.border.*; // Importa as bordas do Swing
-import javax.swing.table.*; // Importa os componentes de tabela do Swing
-import java.awt.*; // Importa as classes de interface gráfica do AWT
-import java.time.format.DateTimeFormatter; // Importa o formatador de data
+import com.mycompany.contole_estoque.*;
+import com.mycompany.contole_estoque.store.EstoqueStore;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.time.format.DateTimeFormatter;
 
 // Painel de Alertas — lista alertas ativos com filtro por tipo.
 // Botão para regerar alertas com base no estado atual dos lotes.

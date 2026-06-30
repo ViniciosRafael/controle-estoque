@@ -1,9 +1,9 @@
 package com.mycompany.contole_estoque.gui; // Define o pacote desta classe
 
-import javax.swing.*; // Importa componentes gerais do Swing
-import javax.swing.border.*; // Importa tipos de bordas do Swing
-import java.awt.*; // Importa recursos essenciais do AWT
-import java.awt.event.*; // Importa o tratador de eventos do AWT
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class MainFrame extends JFrame { // Declara a classe do formulário principal herdando JFrame
 

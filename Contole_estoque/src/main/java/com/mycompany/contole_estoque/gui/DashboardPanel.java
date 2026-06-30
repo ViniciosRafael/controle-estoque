@@ -1,13 +1,13 @@
 package com.mycompany.contole_estoque.gui; // Define o pacote do painel de dashboard
 
-import com.mycompany.contole_estoque.*; // Importa as classes principais do controle de estoque
-import com.mycompany.contole_estoque.store.EstoqueStore; // Importa a loja de dados do estoque
-import com.mycompany.contole_estoque.gui.theme.Tema; // Importa o tema visual da aplicação
-import javax.swing.*; // Importa os componentes gráficos do Swing
-import javax.swing.border.*; // Importa as classes de bordas do Swing
-import javax.swing.table.*; // Importa as classes de tabelas do Swing
-import java.awt.*; // Importa os utilitários gráficos básicos do AWT
-import java.time.format.DateTimeFormatter; // Importa o formatador de data e hora
+import com.mycompany.contole_estoque.*;
+import com.mycompany.contole_estoque.store.EstoqueStore;
+import com.mycompany.contole_estoque.gui.theme.Tema;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.time.format.DateTimeFormatter;
 
 // Esta tela é o "Resumo Geral" (Dashboard).
 // Ela mostra cards com números totais e uma tabela de alertas.

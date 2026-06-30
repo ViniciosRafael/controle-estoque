@@ -1,10 +1,9 @@
-package com.mycompany.contole_estoque.gui; // Define o pacote desta classe
-
-import com.mycompany.contole_estoque.config.ConfiguracoesStore; // Importa a classe ConfiguracoesStore
-import com.mycompany.contole_estoque.gui.theme.Tema; // Importa a classe Tema
-import javax.swing.*; // Importa todos os componentes da biblioteca Swing
-import javax.swing.border.*; // Importa todas as classes de borda do Swing
-import java.awt.*; // Importa todas as classes da biblioteca AWT
+package com.mycompany.contole_estoque.gui; 
+import com.mycompany.contole_estoque.config.ConfiguracoesStore;
+import com.mycompany.contole_estoque.gui.theme.Tema;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
 
 // Painel de Configurações do sistema. // Documentação inicial da classe
 // // Linha em branco da documentação
@@ -32,7 +31,7 @@ public class ConfiguracoesPanel extends JPanel { // Declara a classe pública es
         refresh(); // Invoca a atualização visual dos controles
     } // Encerra o escopo do construtor
 
-    // ------------------------------------------------------------------ build // Separador da seção de montagem
+
     private JPanel buildHeader() { // Método privado para criar a área superior
         JPanel p = new JPanel(new BorderLayout()); // Instancia o contêiner do cabeçalho
         p.setOpaque(false); // Remove o fundo sólido do contêiner
@@ -127,7 +126,6 @@ public class ConfiguracoesPanel extends JPanel { // Declara a classe pública es
                 JOptionPane.WARNING_MESSAGE); // Adiciona um ícone em formato de triângulo de aviso
     } // Conclui a declaração do método informacional
 
-    // ----------------------------------------------------------------- refresh // Separa a seção de atualização do estado
     // Sincroniza os checkboxes com o estado atual salvo em ConfiguracoesStore. // Descrição inicial do método
     public void refresh() { // Método para atualizar os marcadores de seleção
         chkPereciveis.setSelected(ConfiguracoesStore.get().isPereciveisHabilitados()); // Consulta o valor atual para perecíveis e aplica ao checkbox

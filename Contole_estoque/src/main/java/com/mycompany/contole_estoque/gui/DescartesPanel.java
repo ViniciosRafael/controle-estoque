@@ -1,13 +1,13 @@
 package com.mycompany.contole_estoque.gui; // Define o pacote ao qual esta classe pertence
 
-import com.mycompany.contole_estoque.*; // Importa todas as classes do pacote base do projeto
-import com.mycompany.contole_estoque.store.EstoqueStore; // Importa a classe EstoqueStore para manipulação de dados
-import com.mycompany.contole_estoque.gui.theme.Tema; // Importa a classe Tema que contém as cores e estilos
-import javax.swing.*; // Importa todas as classes visuais da biblioteca Swing
-import javax.swing.border.*; // Importa as classes de manipulação de bordas do Swing
-import javax.swing.table.*; // Importa as classes de formatação e controle de tabelas
-import java.awt.*; // Importa as classes gráficas e de layout da biblioteca AWT
-import java.time.format.DateTimeFormatter; // Importa a classe que formata datas no Java
+import com.mycompany.contole_estoque.*;
+import com.mycompany.contole_estoque.store.EstoqueStore;
+import com.mycompany.contole_estoque.gui.theme.Tema;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.time.format.DateTimeFormatter;
 
 // Painel de Histórico de Movimentações — exibe todas as movimentações do estoque:
 // inclusões, baixas e descartes.
